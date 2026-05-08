@@ -1024,7 +1024,10 @@ function mkProject() {
     };
 }
 function getProjects()    { return JSON.parse(localStorage.getItem('sc_proj') || '[]'); }
-function setProjects(arr) { localStorage.setItem('sc_proj', JSON.stringify(arr)); }
+function setProjects(arr) {
+    try { localStorage.setItem('sc_proj', JSON.stringify(arr)); }
+    catch(e) { showToast('⚠️ 저장 공간 부족 — 첨부사진을 줄여주세요'); }
+}
 
 function persistCurrent() {
     if (!cur) return;
@@ -1075,7 +1078,7 @@ function saveCurrent() {
     if (pg === 6) persistCurrent();
 }
 function goTo(n) {
-    saveCurrent();
+    try { saveCurrent(); } catch(e) {}
     // ── 필수 입력 검증 ──
     if (pg === 1 && n === 2) {
         const nm = (document.getElementById('p1_nm').value || '').trim();
@@ -1098,14 +1101,14 @@ function goTo(n) {
 function goHome() {
     if (!cur || pg === 0) { cur = null; showPage(0); return; }
     showConfirm('프로젝트 목록으로 돌아가시겠습니까?\n작업 내용은 자동으로 저장됩니다.', () => {
-        saveCurrent(); persistCurrent(); cur = null; showPage(0);
+        try { saveCurrent(); persistCurrent(); } catch(e) {} cur = null; showPage(0);
     }, { icon: '🏠', title: '홈으로 이동', okText: '나가기', okClass: 'btn-primary' });
 }
 function navStep(n) {
     if (n === pg) return;
     if (pg === 0 && n > 0 && !cur) return;
     if (n === 0) { goHome(); return; }
-    saveCurrent();
+    try { saveCurrent(); } catch(e) {}
     showPage(n);
 }
 
@@ -2175,8 +2178,9 @@ function addImagesToRow(files) {
     let loaded = 0;
     valid.forEach(file => {
         const reader = new FileReader();
-        reader.onload = ev => {
-            actRowImages[curImgRowId].push({ name: file.name, dataUrl: ev.target.result });
+        reader.onload = async ev => {
+            const compressed = await compressImage(ev.target.result, 1200, 1600, 0.7);
+            actRowImages[curImgRowId].push({ name: file.name, dataUrl: compressed });
             loaded++;
             if (loaded === valid.length) renderImgList();
         };
@@ -2547,6 +2551,24 @@ async function doExportActPDF() {
         clearBtns2.forEach(b => b.style.visibility = '');
     }
     doc.save(fn);
+}
+
+// ══ IMAGE COMPRESS ══
+function compressImage(dataUrl, maxW, maxH, quality) {
+    return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => {
+            let w = img.width, h = img.height;
+            if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+            if (h > maxH) { w = Math.round(w * maxH / h); h = maxH; }
+            const cvs = document.createElement('canvas');
+            cvs.width = w; cvs.height = h;
+            cvs.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(cvs.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+    });
 }
 
 // ══ UTILITIES ══
