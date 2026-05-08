@@ -27,7 +27,7 @@
 
         /* ── App ── */
         .app {
-            max-width: 1100px; width: 100%; margin: 0 auto;
+            max-width: 1430px; width: 100%; margin: 0 auto;
             background: #fff; border-radius: 12px;
             box-shadow: 0 4px 16px rgba(0,0,0,.08); overflow: hidden;
         }
@@ -230,7 +230,7 @@
         }
         .sig-canvas-box { display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .sig-canvas-box label { font-size: .8rem; color: #555; }
-        #sigCanvas {
+        #sigCanvas, #asigCanvas {
             border: 1px dashed #aaa; border-radius: 6px;
             cursor: crosshair; background: #fefefe;
             display: block;
@@ -687,6 +687,7 @@
             </div>
             <div style="display:flex;gap:8px;margin-top:10px">
                 <button class="btn btn-add" style="padding:9px 18px" onclick="addRow()">+ 항목 추가</button>
+                <button class="btn btn-outline" style="padding:9px 18px" onclick="copySelectedRows()">복사</button>
                 <button class="btn btn-danger" style="padding:9px 18px" onclick="deleteSelectedRows()">선택 삭제</button>
             </div>
             <div class="total-box">
@@ -762,6 +763,7 @@
             </div>
             <div style="display:flex;gap:8px;margin-top:10px">
                 <button class="btn btn-add" style="padding:9px 18px" onclick="addActRow()">+ 항목 추가</button>
+                <button class="btn btn-outline" style="padding:9px 18px" onclick="copySelectedActRows()">복사</button>
                 <button class="btn btn-danger" style="padding:9px 18px" onclick="deleteSelectedActRows()">선택 삭제</button>
             </div>
             <div class="total-box">
@@ -1370,11 +1372,11 @@ function buildReport() {
                 <th rowspan="4">공사종류<br>(해당난에<br>✔ 표)</th>
                 <td class="rc">건축공사 ${ck('건축공사')}</td>
                 <th rowspan="4">공사금액</th>
-                <td>① 재료비(완제품가액포함)</td>
+                <td>① 재료비<br>(완제품가액포함)</td>
                 <td class="rv" colspan="4"${gAttr}>${matStr}</td>
             </tr>
             <tr>
-                <td class="rc">토목공사(생산설비) ${ck('토목공사')}</td>
+                <td class="rc">토목공사<br>(생산설비) ${ck('토목공사')}</td>
                 <td>② 직접노무비</td><td class="rv" colspan="4"${gAttr}>${labStr}</td>
             </tr>
             <tr>
@@ -1722,6 +1724,24 @@ function copyActRow(tr) {
     });
     showToast('행이 복사되었습니다.');
 }
+function copySelectedRows() {
+    const checked = [...document.querySelectorAll('#detailBody tr .row-chk:checked')];
+    if (!checked.length) { showToast('복사할 항목을 선택해주세요.'); return; }
+    checked.forEach(cb => {
+        const tr = cb.closest('tr');
+        const td = tr.querySelectorAll('td');
+        addRow({
+            cat:   td[1].querySelector('select').value,
+            sub:   td[2].querySelector('input').value,
+            date:  td[3].querySelector('input').value,
+            unit:  td[4].querySelector('select').value,
+            qty:   td[5].querySelector('input').value,
+            price: td[6].querySelector('input').value,
+            amt:   td[7].querySelector('input').value
+        });
+    });
+    showToast(checked.length + '개 항목이 복사되었습니다.');
+}
 function deleteSelectedRows() {
     const checked = [...document.querySelectorAll('#detailBody tr .row-chk:checked')];
     if (!checked.length) { showToast('삭제할 항목을 선택해주세요.'); return; }
@@ -1729,6 +1749,27 @@ function deleteSelectedRows() {
         checked.forEach(cb => cb.closest('tr').remove());
         updTotal();
     });
+}
+function copySelectedActRows() {
+    const checked = [...document.querySelectorAll('#actDetailBody tr .row-chk:checked')];
+    if (!checked.length) { showToast('복사할 항목을 선택해주세요.'); return; }
+    checked.forEach(cb => {
+        const tr = cb.closest('tr');
+        const td = tr.querySelectorAll('td');
+        const srcId = tr.dataset.rowId;
+        const imgs = (srcId && actRowImages[srcId]) ? JSON.parse(JSON.stringify(actRowImages[srcId])) : [];
+        addActRow({
+            cat:   td[1].querySelector('select').value,
+            sub:   td[2].querySelector('input').value,
+            date:  td[3].querySelector('input').value,
+            unit:  td[4].querySelector('select').value,
+            qty:   td[5].querySelector('input').value,
+            price: td[6].querySelector('input').value,
+            amt:   td[7].querySelector('input').value,
+            imgs:  imgs
+        });
+    });
+    showToast(checked.length + '개 항목이 복사되었습니다.');
 }
 function deleteSelectedActRows() {
     const checked = [...document.querySelectorAll('#actDetailBody tr .row-chk:checked')];
@@ -1976,11 +2017,11 @@ function buildActReport() {
                 <th rowspan="4">공사종류<br>(해당난에<br>✔ 표)</th>
                 <td class="rc">건축공사 ${ck('건축공사')}</td>
                 <th rowspan="4">공사금액</th>
-                <td>① 재료비(완제품가액포함)</td>
+                <td>① 재료비<br>(완제품가액포함)</td>
                 <td class="rv" colspan="4"${gAttr}>${matStr}</td>
             </tr>
             <tr>
-                <td class="rc">토목공사(생산설비) ${ck('토목공사')}</td>
+                <td class="rc">토목공사<br>(생산설비) ${ck('토목공사')}</td>
                 <td>② 직접노무비</td><td class="rv" colspan="4"${gAttr}>${labStr}</td>
             </tr>
             <tr>
