@@ -579,7 +579,7 @@
                     <button class="btn btn-primary" onclick="newProject()">+ 새 프로젝트</button>
                     <button class="btn btn-secondary" onclick="exportProjects()" title="선택한 프로젝트를 파일로 저장">📤 프로젝트 내보내기</button>
                     <button class="btn btn-secondary" onclick="document.getElementById('importFileInput').click()" title="저장된 프로젝트 파일을 불러오기">📥 프로젝트 가져오기</button>
-                    <input type="file" id="importFileInput" accept=".scpdata" style="display:none" onchange="handleImportFile(this)">
+                    <input type="file" id="importFileInput" accept="*/*" style="display:none" onchange="handleImportFile(this)">
                 </div>
             </div>
             <div class="pt-wrap" id="ptWrap">
@@ -1131,7 +1131,7 @@ function renderHome() {
             <td><input type="checkbox" class="pchk" data-id="${p.id}"></td>
             <td>${i + 1}</td>
             <td class="td-l">${p.info.snm || '-'}</td>
-            <td class="td-l">${p.info.nm || '-'}</td>
+            <td class="td-l"><a onclick="editProj('${p.id}')" style="color:#007bff;font-weight:700;cursor:pointer;text-decoration:none">${p.info.nm || '-'}</a></td>
             <td style="font-size:.8rem">${period}</td>
             <td style="text-align:right;font-size:.82rem;padding-right:8px">${vatDisp}</td>
             <td style="text-align:right;font-size:.82rem;color:#0056b3;font-weight:600;padding-right:8px">${p.calc && p.calc.feeTxt && p.calc.feeTxt !== '-' ? p.calc.feeTxt : '-'}</td>
@@ -1205,25 +1205,36 @@ function toggleDash() {
 }
 
 // ══ PROJECT EXPORT / IMPORT ══
-function exportProjects() {
+async function exportProjects() {
     const ids = [...document.querySelectorAll('.pchk:checked')].map(c => c.dataset.id);
     if (!ids.length) { alert('내보낼 프로젝트를 선택해주세요.'); return; }
     const selected = getProjects().filter(p => ids.includes(p.id));
     const payload  = JSON.stringify({ ver: '1.0', app: 'safetycost', exported: new Date().toISOString(), projects: selected });
     const blob = new Blob([payload], { type: 'application/octet-stream' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
     const first = selected[0];
-    const fnFrom = (first.info && first.info.from) ? first.info.from : '';
-    const fnSnm  = (first.info && first.info.snm)  ? first.info.snm  : '';
-    const fnNm   = (first.info && first.info.nm)   ? first.info.nm   : '';
+    const fnFrom  = (first.info && first.info.from) ? first.info.from : '';
+    const fnSnm   = (first.info && first.info.snm)  ? first.info.snm  : '';
+    const fnNm    = (first.info && first.info.nm)   ? first.info.nm   : '';
     const fnSuffix = selected.length > 1 ? `_등 ${selected.length}개` : '';
-    a.href = url;
-    a.download = `${fnFrom}_${fnSnm}_${fnNm}${fnSuffix}.scpdata`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const fileName = `${fnFrom}_${fnSnm}_${fnNm}${fnSuffix}.scpdata`;
+
+    if (_mobileMode && navigator.canShare) {
+        try {
+            const file = new File([blob], fileName, { type: 'application/octet-stream' });
+            if (navigator.canShare({ files: [file] })) {
+                await navigator.share({ files: [file], title: '산업안전보건관리비 프로젝트' });
+                showToast(selected.length + '개 프로젝트를 공유했습니다.');
+                return;
+            }
+        } catch (e) {
+            if (e.name === 'AbortError') return;
+        }
+    }
+    const url = URL.createObjectURL(blob);
+    const a   = document.createElement('a');
+    a.href = url; a.download = fileName;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
     showToast(selected.length + '개 프로젝트를 파일로 저장했습니다.');
 }
 function handleImportFile(input) {
