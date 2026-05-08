@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>코웨이 산업안전보건관리비</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -399,6 +399,8 @@
         body.mobile-mode .rpage { padding: 20px 14px; }
         body.mobile-mode .pt { font-size: .8rem; }
         body.mobile-mode .pt th, body.mobile-mode .pt td { padding: 7px 5px; }
+        body.mobile-mode .app.report-mode { height: calc(100dvh - 40px); }
+        body.mobile-mode .page-nav { padding-bottom: max(env(safe-area-inset-bottom, 0px), 12px); }
     </style>
 </head>
 <body>
