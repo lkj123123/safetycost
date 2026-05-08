@@ -159,7 +159,9 @@
         .ti { width: 100%; padding: 5px 5px; border: 1px solid #ddd; border-radius: 5px; font-size: .79rem; }
         .ti-r { text-align: right; }
         .ti:disabled { background: #f5f5f5; color: #bbb; }
-        .btn-del { background: none; border: none; color: #dc3545; font-size: 1rem; cursor: pointer; padding: 2px 6px; }
+        .btn-del  { background: none; border: none; color: #dc3545; font-size: 1rem; cursor: pointer; padding: 2px 6px; }
+        .btn-copy { background: none; border: none; color: #17a2b8; font-size: .75rem; cursor: pointer; padding: 2px 5px; font-weight: 600; }
+        .btn-copy:hover { color: #0d6e7e; }
         .total-box {
             margin-top: 12px; padding: 12px 15px;
             background: #e9f5ff; border: 1px solid #b3d7f5; border-radius: 8px;
@@ -242,12 +244,13 @@
 
         /* ── Help ── */
         .help-btn {
-            width: 28px; height: 28px; border-radius: 50%;
+            height: 28px; border-radius: 6px;
             background: rgba(255,255,255,.22); color: #fff;
             border: 1.5px solid rgba(255,255,255,.55);
-            font-size: .92rem; font-weight: 700; cursor: pointer;
+            font-size: .78rem; font-weight: 700; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            line-height: 1; transition: background .2s; padding: 0;
+            line-height: 1; transition: background .2s; padding: 0 10px;
+            white-space: nowrap;
         }
         .help-btn:hover { background: rgba(255,255,255,.38); }
         .help-content h3 { font-size: .92rem; color: #0056b3; margin: 14px 0 5px; }
@@ -360,50 +363,96 @@
 
 <!-- 도움말 모달 -->
 <div class="modal-overlay" id="helpModal" style="display:none">
-    <div class="modal-box" style="max-width:520px;text-align:left;max-height:80vh;overflow-y:auto;padding:32px 28px">
-        <p class="modal-title" style="text-align:center;margin-bottom:20px">📋 도움말</p>
-        <div class="help-content">
-            <h3>🏠 홈 화면</h3>
+    <div class="modal-box" style="max-width:560px;width:94vw;text-align:left;padding:0;display:flex;flex-direction:column;max-height:88vh">
+
+        <!-- 고정 헤더 -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:2px solid #f0f0f0;flex-shrink:0">
+            <p class="modal-title" style="margin:0;font-size:1.1rem">📋 도움말</p>
+            <button onclick="closeHelpModal()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#aaa;line-height:1;padding:0 2px" title="닫기">✕</button>
+        </div>
+
+        <!-- 스크롤 본문 -->
+        <div style="flex:1;overflow-y:auto;padding:20px 24px" class="help-content">
+
+            <h3>🏠 홈 화면 — 프로젝트 관리</h3>
             <ul>
-                <li><b>새 프로젝트</b>: 새로운 공사 프로젝트를 등록합니다.</li>
-                <li><b>수정</b>: 기존 프로젝트를 불러와 수정합니다.</li>
-                <li><b>선택 삭제</b>: 체크박스로 선택 후 삭제합니다.</li>
+                <li><b>+ 새 프로젝트</b> : 새로운 공사 프로젝트를 등록합니다.</li>
+                <li><b>📋 복사</b> : 체크박스로 선택한 프로젝트를 그대로 복제합니다. 모든 입력 데이터가 함께 복사됩니다.</li>
+                <li><b>선택 삭제</b> : 체크박스로 선택한 프로젝트를 삭제합니다.</li>
+                <li><b>수정</b> : 해당 프로젝트를 불러와 내용을 수정합니다.</li>
+                <li><b>📤 프로젝트 내보내기</b> : 선택한 프로젝트를 <code>.scpdata</code> 파일로 저장합니다. 다른 PC로 전달할 때 사용합니다.</li>
+                <li><b>📥 프로젝트 가져오기</b> : 저장된 <code>.scpdata</code> 파일을 불러와 목록에 추가합니다.</li>
             </ul>
+
             <h3>① 프로젝트 정보 입력</h3>
             <ul>
-                <li>공사업체명, 공사명, 공사소재지, 공사대표자, 공사기간을 입력합니다.</li>
-                <li>입력 후 <b>다음 →</b> 버튼으로 진행합니다.</li>
+                <li>공사업체명, 공사명, 공사사업장명, 공사소재지, 공사대표자, 공사기간을 입력합니다.</li>
+                <li>모든 정보는 이후 계획서·내역서 문서에 자동으로 반영됩니다.</li>
             </ul>
+
             <h3>② 산업안전보건관리비 계상</h3>
             <ul>
-                <li><b>공사구분</b>: 건축/토목/중건설/특수건설 중 해당 공사를 선택합니다.</li>
-                <li><b>공사내역구분</b>: 견적서에서 재료비·노무비가 구분되면 "구분됨"을 선택합니다.</li>
-                <li><b>총공사금액(VAT 제외)</b>: 입력 시 VAT 포함 금액이 자동 계산됩니다.</li>
-                <li>입력값이 바뀔 때마다 대상액과 산업안전보건관리비가 자동 계산됩니다.</li>
-                <li>총공사금액(VAT 포함) 2천만원 미만은 "계상 대상 아님"으로 표시됩니다.</li>
+                <li><b>공사구분</b> : 건축 / 토목(생산설비) / 중건설 / 특수건설 중 해당 공사를 선택합니다.</li>
+                <li><b>공사내역구분</b> : 견적서에서 재료비·노무비가 구분되어 있으면 "구분됨"을 선택합니다.</li>
+                <li><b>총공사금액(VAT 제외)</b> 입력 시 VAT 포함 금액이 자동 계산됩니다.</li>
+                <li>대상액과 산업안전보건관리비는 입력값이 바뀔 때마다 실시간 자동 계산됩니다.</li>
+                <li>총공사금액(VAT 포함) <b>2천만원 미만</b>은 "계상 대상 아님"으로 표시됩니다.</li>
             </ul>
-            <h3>③ 내역 정리</h3>
+
+            <h3>③ 계획 수립 (사용계획서 작성)</h3>
             <ul>
-                <li><b>+ 항목 추가</b>: 실제 사용한 안전보건관리비 항목을 추가합니다.</li>
-                <li>항목, 품목명, 구매일자, 단위, 수량, 단가를 입력하면 금액이 자동 계산됩니다.</li>
+                <li><b>+ 항목 추가</b>로 행을 추가한 뒤, 항목·세부항목·구매일자·단위·수량·단가를 입력합니다.</li>
+                <li><b>세부항목은 필수 입력</b>입니다. 세부항목이 없으면 수량·단가를 입력해도 금액이 계산되지 않습니다.</li>
+                <li>행마다 체크박스를 체크하면 <b>선택 삭제</b>로 여러 항목을 한 번에 삭제할 수 있습니다.</li>
+                <li>화면 하단에 <b>계상된 산업안전보건관리비 대비 계획금액 비율(%)</b>이 실시간으로 표시됩니다.</li>
             </ul>
-            <h3>④ 최종 확인 &amp; PDF 출력</h3>
+
+            <h3>④ 사용계획서 확인 &amp; PDF 출력</h3>
             <ul>
-                <li>직책·성명을 입력하고 서명란에 마우스(또는 터치)로 서명합니다.</li>
-                <li>입력한 서명 정보는 자동 저장되어 페이지를 이동해도 유지됩니다.</li>
-                <li><b>PDF 출력</b> 버튼으로 사용내역서를 A4 PDF로 저장합니다.</li>
+                <li>작성한 계획 내역을 <b>A4 형식의 미리보기</b>로 확인합니다.</li>
+                <li>작성자 직책·성명을 입력하고 서명란에 마우스(또는 터치)로 서명합니다.</li>
+                <li>서명 정보는 자동 저장되어 페이지를 이동해도 유지됩니다.</li>
+                <li><b>사용계획서 PDF 출력</b> 버튼으로 A4 PDF 파일을 저장합니다.</li>
             </ul>
+
+            <h3>⑤ 최종 사용내역 정리</h3>
+            <ul>
+                <li>실제 구매·사용한 내역을 항목별로 입력합니다. <b>세부항목은 필수</b>입니다.</li>
+                <li><b>📎 증빙자료</b> : 항목별로 사진을 첨부합니다. 드래그앤드롭 또는 클릭으로 선택하며 이미지 파일만 가능합니다 (파일당 최대 3MB).</li>
+                <li><b>계획 수립 내역 가져오기</b> : 계획 단계에서 작성한 내역을 그대로 불러와 사용내역 작성 시간을 줄일 수 있습니다.</li>
+                <li>계상된 산업안전보건관리비 대비 <b>사용금액 비율(%)</b>이 실시간으로 표시됩니다.</li>
+            </ul>
+
+            <h3>⑥ 사용내역서 확인 &amp; PDF 출력</h3>
+            <ul>
+                <li>작성한 사용내역을 <b>A4 형식의 미리보기</b>로 확인합니다.</li>
+                <li>작성자 서명 후 <b>사용내역서 최종 PDF 출력</b> 버튼으로 저장합니다.</li>
+                <li>PDF에는 <b>사용내역서 + 항목별 내역서 + 증빙내역(사진)</b>이 모두 포함됩니다.</li>
+                <li>증빙사진이 없는 항목은 "증빙 없음"으로 표시됩니다.</li>
+            </ul>
+
+            <h3>💡 공통 안내</h3>
+            <ul>
+                <li>모든 데이터는 브라우저의 <b>로컬 저장소(localStorage)</b>에 자동 저장됩니다.</li>
+                <li>같은 브라우저·기기에서는 새로고침 후에도 데이터가 유지됩니다.</li>
+                <li>다른 기기로 이동하려면 <b>프로젝트 내보내기/가져오기</b>를 사용하세요.</li>
+                <li>삭제·덮어쓰기 등의 중요 작업은 항상 <b>확인 팝업</b>이 표시됩니다.</li>
+            </ul>
+
         </div>
-        <div style="text-align:center;margin-top:22px;padding-top:16px;border-top:1px solid #eee">
-            <p style="font-size:.82rem;color:#666;margin-bottom:10px">궁금하신 사항이나 수정 요청이 있으시면 담당자에게 문의해주세요.</p>
-            <div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap">
-                <span style="font-size:.92rem;color:#333;font-weight:600">📧 kj@coway.com</span>
-                <button class="btn btn-outline" style="padding:5px 14px;font-size:.8rem" onclick="copyEmail()">주소 복사</button>
+
+        <!-- 고정 푸터 -->
+        <div style="padding:14px 24px;border-top:1px solid #eee;flex-shrink:0">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                    <span style="font-size:.82rem;color:#666">문의 :</span>
+                    <span style="font-size:.88rem;color:#333;font-weight:600">📧 kj@coway.com</span>
+                    <button class="btn btn-outline" style="padding:4px 12px;font-size:.78rem" onclick="copyEmail()">주소 복사</button>
+                </div>
+                <button class="btn btn-home" style="padding:8px 20px" onclick="closeHelpModal()">닫 기</button>
             </div>
         </div>
-        <div style="text-align:center;margin-top:16px">
-            <button class="btn btn-home" onclick="closeHelpModal()">닫 기</button>
-        </div>
+
     </div>
 </div>
 
@@ -425,8 +474,8 @@
     <div class="app-header">
         <h1>코웨이 산업안전보건관리비</h1>
         <div style="display:flex;align-items:center;gap:10px">
-            <button class="help-btn" onclick="openHelpModal()" title="도움말">?</button>
-            <span class="ver">V2.2_2026.05.07</span>
+            <button class="help-btn" onclick="openHelpModal()">도움말</button>
+            <span class="ver">V2.3_2026.05.07</span>
         </div>
     </div>
 
@@ -782,7 +831,7 @@
         <p class="modal-title" id="confirmTitle">확인</p>
         <p class="modal-msg" id="confirmMsg"></p>
         <div class="modal-btns">
-            <button class="btn btn-home" onclick="closeConfirm(false)">취 소</button>
+            <button class="btn btn-home" id="confirmCancelBtn" onclick="closeConfirm(false)">취 소</button>
             <button class="btn btn-danger" id="confirmOkBtn" onclick="closeConfirm(true)">삭 제</button>
         </div>
     </div>
@@ -811,6 +860,7 @@ function showConfirm(msg, onYes, opts = {}) {
     const okBtn = document.getElementById('confirmOkBtn');
     okBtn.textContent = opts.okText || '삭 제';
     okBtn.className = 'btn ' + (opts.okClass || 'btn-danger');
+    document.getElementById('confirmCancelBtn').style.display = opts.noCancel ? 'none' : '';
     _confirmCb = onYes;
     document.getElementById('confirmModal').style.display = 'flex';
 }
@@ -913,15 +963,36 @@ function saveCurrent() {
 }
 function goTo(n) {
     saveCurrent();
+    // ── 필수 입력 검증 ──
+    if (pg === 1 && n === 2) {
+        const nm = (document.getElementById('p1_nm').value || '').trim();
+        if (!nm) {
+            showConfirm('공사명을 입력해주세요.', null,
+                { icon: 'ℹ️', title: '필수 입력 누락', okText: '확 인', okClass: 'btn-primary', noCancel: true });
+            return;
+        }
+    }
+    if (pg === 2 && n === 3) {
+        if (!cur || !cur.calc.feeRaw || cur.calc.feeRaw <= 0) {
+            showConfirm('산업안전보건관리비가 계상되지 않았습니다.\n금액을 입력하고 계산 결과를 확인해주세요.', null,
+                { icon: '⚠️', title: '계상 확인 필요', okText: '확 인', okClass: 'btn-primary', noCancel: true });
+            return;
+        }
+    }
     if (n >= 3 && cur) persistCurrent();
     showPage(n);
 }
-function goHome() { saveCurrent(); persistCurrent(); cur = null; showPage(0); }
+function goHome() {
+    if (!cur || pg === 0) { cur = null; showPage(0); return; }
+    showConfirm('프로젝트 목록으로 돌아가시겠습니까?\n작업 내용은 자동으로 저장됩니다.', () => {
+        saveCurrent(); persistCurrent(); cur = null; showPage(0);
+    }, { icon: '🏠', title: '홈으로 이동', okText: '나가기', okClass: 'btn-primary' });
+}
 function navStep(n) {
     if (n === pg) return;
-    if (pg === 0 && n > 0 && !cur) return; // home → step without project
+    if (pg === 0 && n > 0 && !cur) return;
+    if (n === 0) { goHome(); return; }
     saveCurrent();
-    if (n === 0) { cur = null; showPage(0); return; }
     showPage(n);
 }
 
@@ -1166,13 +1237,14 @@ function addRow(d) {
     const catOpts = CATS.map(c => `<option${d && d.cat === c ? ' selected' : ''}>${c}</option>`).join('');
     const uOpts   = UNITS.map(u => `<option${d && d.unit === u ? ' selected' : ''}>${u}</option>`).join('');
     const v = (d, k) => d ? (d[k] || '') : '';
+    const today   = new Date().toISOString().slice(0, 10);
     const initAmt = (d && d.sub && d.sub.trim()) ? v(d, 'amt') : '';
     tr.innerHTML = `
         <td style="text-align:center"><input type="checkbox" class="row-chk"></td>
         <td><select class="ti">${catOpts}</select></td>
         <td><input class="ti sub-i" type="text" placeholder="품목명을 기입하세요" value="${v(d,'sub')}"
             oninput="calcAmt(this.closest('tr'))"></td>
-        <td><input class="ti" type="date" value="${v(d,'date')}"></td>
+        <td><input class="ti" type="date" value="${v(d,'date') || today}"></td>
         <td><select class="ti">${uOpts}</select></td>
         <td><input class="ti ti-r qty-i" type="text" placeholder="0" inputmode="numeric"
             value="${v(d,'qty')}" oninput="this.value=this.value.replace(/[^0-9]/g,'');calcAmt(this.closest('tr'))"></td>
@@ -1181,9 +1253,12 @@ function addRow(d) {
         <td><input class="ti ti-r amt-i" type="text" readonly
             value="${initAmt}" placeholder="세부항목을 기입하세요"
             style="background:#f5f5f5;color:#0056b3;font-weight:600;font-size:.72rem"></td>
-        <td style="text-align:center"><button class="btn-del"
-            onclick="const _tr=this.closest('tr');showConfirm('항목을 삭제하시겠습니까?',()=>{_tr.remove();updTotal();})">✕</button></td>`;
+        <td style="text-align:center;white-space:nowrap">
+            <button class="btn-copy" onclick="copyRow(this.closest('tr'))" title="복사">복사</button>
+            <button class="btn-del"
+                onclick="const _tr=this.closest('tr');showConfirm('항목을 삭제하시겠습니까?',()=>{_tr.remove();updTotal();})">✕</button></td>`;
     tbody.appendChild(tr);
+    updTotal();
 }
 function calcAmt(tr) {
     const sub = tr.querySelector('.sub-i');
@@ -1545,9 +1620,9 @@ async function doExportPDF() {
         alert('라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return;
     }
     const nm       = cur ? (cur.info.nm   || '공사명') : '공사명';
-    const co       = cur ? (cur.info.co   || '')       : '';
+    const snm      = cur ? (cur.info.snm  || '')       : '';
     const fromDate = cur ? (cur.info.from || '')       : '';
-    const fn  = `${fromDate}_${nm}_${co}_산업안전보건관리비 사용계획서.pdf`;
+    const fn  = `${fromDate}_${snm}_${nm}_산업안전보건관리비 사용계획서.pdf`;
 
     const doc = new jsPDF('p', 'mm', 'a4');
     const pw  = doc.internal.pageSize.getWidth();
@@ -1618,6 +1693,35 @@ function importFromPlan() {
 function toggleAllRows(tbodyId, chk) {
     document.querySelectorAll('#' + tbodyId + ' tr .row-chk').forEach(c => c.checked = chk.checked);
 }
+function copyRow(tr) {
+    const td = tr.querySelectorAll('td');
+    addRow({
+        cat:   td[1].querySelector('select').value,
+        sub:   td[2].querySelector('input').value,
+        date:  td[3].querySelector('input').value,
+        unit:  td[4].querySelector('select').value,
+        qty:   td[5].querySelector('input').value,
+        price: td[6].querySelector('input').value,
+        amt:   td[7].querySelector('input').value
+    });
+    showToast('행이 복사되었습니다.');
+}
+function copyActRow(tr) {
+    const td = tr.querySelectorAll('td');
+    const srcId = tr.dataset.rowId;
+    const imgs = (srcId && actRowImages[srcId]) ? JSON.parse(JSON.stringify(actRowImages[srcId])) : [];
+    addActRow({
+        cat:   td[1].querySelector('select').value,
+        sub:   td[2].querySelector('input').value,
+        date:  td[3].querySelector('input').value,
+        unit:  td[4].querySelector('select').value,
+        qty:   td[5].querySelector('input').value,
+        price: td[6].querySelector('input').value,
+        amt:   td[7].querySelector('input').value,
+        imgs:  imgs
+    });
+    showToast('행이 복사되었습니다.');
+}
 function deleteSelectedRows() {
     const checked = [...document.querySelectorAll('#detailBody tr .row-chk:checked')];
     if (!checked.length) { showToast('삭제할 항목을 선택해주세요.'); return; }
@@ -1668,13 +1772,14 @@ function addActRow(d) {
     const uOpts   = UNITS.map(u => `<option${d && d.unit === u ? ' selected' : ''}>${u}</option>`).join('');
     const v = (x, k) => x ? (x[k] || '') : '';
     const cnt = actRowImages[rowId].length;
+    const today   = new Date().toISOString().slice(0, 10);
     const initAmt = (d && d.sub && d.sub.trim()) ? v(d, 'amt') : '';
     tr.innerHTML = `
         <td style="text-align:center"><input type="checkbox" class="row-chk"></td>
         <td><select class="ti">${catOpts}</select></td>
         <td><input class="ti sub-i" type="text" placeholder="품목명을 기입하세요" value="${v(d,'sub')}"
             oninput="calcActAmt(this.closest('tr'))"></td>
-        <td><input class="ti" type="date" value="${v(d,'date')}"></td>
+        <td><input class="ti" type="date" value="${v(d,'date') || today}"></td>
         <td><select class="ti">${uOpts}</select></td>
         <td><input class="ti ti-r qty-i" type="text" placeholder="0" inputmode="numeric"
             value="${v(d,'qty')}" oninput="this.value=this.value.replace(/[^0-9]/g,'');calcActAmt(this.closest('tr'))"></td>
@@ -1687,9 +1792,12 @@ function addActRow(d) {
             <button class="img-badge${cnt > 0 ? ' has-img' : ''}" id="imgbtn_${rowId}"
                 onclick="openImgPopup('${rowId}')">📎 ${cnt}개</button>
         </td>
-        <td style="text-align:center"><button class="btn-del"
-            onclick="const _tr=this.closest('tr');showConfirm('항목을 삭제하시겠습니까?',()=>{const rId=_tr.dataset.rowId;if(rId)delete actRowImages[rId];_tr.remove();updActTotal();})">✕</button></td>`;
+        <td style="text-align:center;white-space:nowrap">
+            <button class="btn-copy" onclick="copyActRow(this.closest('tr'))" title="복사">복사</button>
+            <button class="btn-del"
+                onclick="const _tr=this.closest('tr');showConfirm('항목을 삭제하시겠습니까?',()=>{const rId=_tr.dataset.rowId;if(rId)delete actRowImages[rId];_tr.remove();updActTotal();})">✕</button></td>`;
     tbody.appendChild(tr);
+    updActTotal();
 }
 function calcActAmt(tr) {
     const sub = tr.querySelector('.sub-i');
@@ -2102,9 +2210,9 @@ async function doExportActPDF() {
     const { jsPDF } = window.jspdf;
     if (!window.html2canvas || !jsPDF) { alert('라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return; }
     const nm       = cur ? (cur.info.nm  || '공사명') : '공사명';
-    const co       = cur ? (cur.info.co  || '')       : '';
+    const snm      = cur ? (cur.info.snm || '')       : '';
     const fromDate = cur ? (cur.info.from || '')       : '';
-    const fn  = `${fromDate}_${nm}_${co}_산업안전보건관리비 사용내역서.pdf`;
+    const fn  = `${fromDate}_${snm}_${nm}_산업안전보건관리비 사용내역서.pdf`;
 
     const doc = new jsPDF('p', 'mm', 'a4');
     const pw  = doc.internal.pageSize.getWidth();
