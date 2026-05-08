@@ -162,6 +162,15 @@
         .btn-del  { background: none; border: none; color: #dc3545; font-size: 1rem; cursor: pointer; padding: 2px 6px; }
         .btn-copy { background: none; border: none; color: #17a2b8; font-size: .75rem; cursor: pointer; padding: 2px 5px; font-weight: 600; }
         .btn-copy:hover { color: #0d6e7e; }
+        .example-row td {
+            background: #fffdf0; color: #aaa; font-style: italic;
+            font-size: .78rem; padding: 4px 4px; border-bottom: 1px dashed #e8e0c0;
+        }
+        .ex-badge {
+            font-size: .62rem; background: #ffc107; color: #555;
+            padding: 1px 5px; border-radius: 4px; font-weight: 700;
+            font-style: normal; white-space: nowrap; display: inline-block;
+        }
         .total-box {
             margin-top: 12px; padding: 12px 15px;
             background: #e9f5ff; border: 1px solid #b3d7f5; border-radius: 8px;
@@ -524,8 +533,8 @@
                 <h2>📁 프로젝트 목록</h2>
                 <div style="display:flex;gap:8px;flex-wrap:wrap">
                     <button class="btn btn-danger" onclick="deleteSelected()">선택 삭제</button>
+                    <button class="btn btn-outline" onclick="copySelected()" title="선택한 프로젝트를 복사">📋 선택 복사</button>
                     <button class="btn btn-primary" onclick="newProject()">+ 새 프로젝트</button>
-                    <button class="btn btn-outline" onclick="copySelected()" title="선택한 프로젝트를 복사">📋 복사</button>
                     <button class="btn btn-secondary" onclick="exportProjects()" title="선택한 프로젝트를 파일로 저장">📤 프로젝트 내보내기</button>
                     <button class="btn btn-secondary" onclick="document.getElementById('importFileInput').click()" title="저장된 프로젝트 파일을 불러오기">📥 프로젝트 가져오기</button>
                     <input type="file" id="importFileInput" accept=".scpdata" style="display:none" onchange="handleImportFile(this)">
@@ -666,19 +675,34 @@
                         <tr>
                             <th style="width:4%"><input type="checkbox" onchange="toggleAllRows('detailBody',this)"></th>
                             <th style="width:12%">항목</th>
-                            <th style="width:15%">세부항목</th>
-                            <th style="width:10%">구매(사용)일자</th>
-                            <th style="width:6%">단위</th>
-                            <th style="width:6%">수량</th>
-                            <th style="width:12%">단가(부가세 제외)</th>
-                            <th style="width:12%">금액(부가세 제외)</th>
+                            <th style="width:12%">세부항목</th>
+                            <th style="width:11%">제품명 등</th>
+                            <th style="width:8%">구매(사용)일자</th>
+                            <th style="width:5%">단위</th>
+                            <th style="width:5%">수량</th>
+                            <th style="width:10%">단가(부가세 제외)</th>
+                            <th style="width:10%">금액(부가세 제외)</th>
                             <th style="width:5%">삭제</th>
                         </tr>
                     </thead>
+                    <tbody>
+                        <tr class="example-row">
+                            <td style="text-align:center"><span class="ex-badge">예시</span></td>
+                            <td>보호구 등</td>
+                            <td>안전화</td>
+                            <td>네파 GT-38</td>
+                            <td style="text-align:center">2026.05.07</td>
+                            <td style="text-align:center">개(EA)</td>
+                            <td style="text-align:right">5</td>
+                            <td style="text-align:right">70,000</td>
+                            <td style="text-align:right;color:#aaa;font-weight:600">350,000</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
                     <tbody id="detailBody"></tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="7" style="text-align:right;padding-right:8px">합 계</td>
+                            <td colspan="8" style="text-align:right;padding-right:8px">합 계</td>
                             <td id="dtTotal" style="text-align:right;padding-right:8px;color:#0056b3">0 원</td>
                             <td></td>
                         </tr>
@@ -687,7 +711,7 @@
             </div>
             <div style="display:flex;gap:8px;margin-top:10px">
                 <button class="btn btn-add" style="padding:9px 18px" onclick="addRow()">+ 항목 추가</button>
-                <button class="btn btn-outline" style="padding:9px 18px" onclick="copySelectedRows()">복사</button>
+                <button class="btn btn-outline" style="padding:9px 18px" onclick="copySelectedRows()">선택 복사</button>
                 <button class="btn btn-danger" style="padding:9px 18px" onclick="deleteSelectedRows()">선택 삭제</button>
             </div>
             <div class="total-box">
@@ -739,21 +763,37 @@
                     <thead>
                         <tr>
                             <th style="width:4%"><input type="checkbox" onchange="toggleAllRows('actDetailBody',this)"></th>
-                            <th style="width:11%">항목</th>
-                            <th style="width:13%">세부항목</th>
-                            <th style="width:9%">구매(사용)일자</th>
-                            <th style="width:5%">단위</th>
-                            <th style="width:5%">수량</th>
-                            <th style="width:11%">단가(부가세 제외)</th>
-                            <th style="width:11%">금액(부가세 제외)</th>
-                            <th style="width:7%">증빙자료</th>
-                            <th style="width:5%">삭제</th>
+                            <th style="width:10%">항목</th>
+                            <th style="width:10%">세부항목</th>
+                            <th style="width:10%">제품명 등</th>
+                            <th style="width:8%">구매(사용)일자</th>
+                            <th style="width:4%">단위</th>
+                            <th style="width:4%">수량</th>
+                            <th style="width:9%">단가(부가세 제외)</th>
+                            <th style="width:9%">금액(부가세 제외)</th>
+                            <th style="width:6%">증빙자료</th>
+                            <th style="width:4%">삭제</th>
                         </tr>
                     </thead>
+                    <tbody>
+                        <tr class="example-row">
+                            <td style="text-align:center"><span class="ex-badge">예시</span></td>
+                            <td>보호구 등</td>
+                            <td>안전화</td>
+                            <td>네파 GT-38</td>
+                            <td style="text-align:center">2026.05.07</td>
+                            <td style="text-align:center">개(EA)</td>
+                            <td style="text-align:right">5</td>
+                            <td style="text-align:right">70,000</td>
+                            <td style="text-align:right;color:#aaa;font-weight:600">350,000</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
                     <tbody id="actDetailBody"></tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="7" style="text-align:right;padding-right:8px">합 계</td>
+                            <td colspan="8" style="text-align:right;padding-right:8px">합 계</td>
                             <td id="actDtTotal" style="text-align:right;padding-right:8px;color:#0056b3">0 원</td>
                             <td></td>
                             <td></td>
@@ -763,7 +803,7 @@
             </div>
             <div style="display:flex;gap:8px;margin-top:10px">
                 <button class="btn btn-add" style="padding:9px 18px" onclick="addActRow()">+ 항목 추가</button>
-                <button class="btn btn-outline" style="padding:9px 18px" onclick="copySelectedActRows()">복사</button>
+                <button class="btn btn-outline" style="padding:9px 18px" onclick="copySelectedActRows()">선택 복사</button>
                 <button class="btn btn-danger" style="padding:9px 18px" onclick="deleteSelectedActRows()">선택 삭제</button>
             </div>
             <div class="total-box">
@@ -1225,11 +1265,12 @@ function snapDetails() {
         cur.details.push({
             cat:  td[1].querySelector('select').value,
             sub:  td[2].querySelector('input').value,
-            date: td[3].querySelector('input').value,
-            unit: td[4].querySelector('select').value,
-            qty:  td[5].querySelector('input').value,
-            price:td[6].querySelector('input').value,
-            amt:  td[7].querySelector('input').value
+            prod: td[3].querySelector('input').value,
+            date: td[4].querySelector('input').value,
+            unit: td[5].querySelector('select').value,
+            qty:  td[6].querySelector('input').value,
+            price:td[7].querySelector('input').value,
+            amt:  td[8].querySelector('input').value
         });
     });
 }
@@ -1246,6 +1287,7 @@ function addRow(d) {
         <td><select class="ti">${catOpts}</select></td>
         <td><input class="ti sub-i" type="text" placeholder="품목명을 기입하세요" value="${v(d,'sub')}"
             oninput="calcAmt(this.closest('tr'))"></td>
+        <td><input class="ti prod-i" type="text" placeholder="제품명·규격 등" value="${v(d,'prod')}"></td>
         <td><input class="ti" type="date" value="${v(d,'date') || today}"></td>
         <td><select class="ti">${uOpts}</select></td>
         <td><input class="ti ti-r qty-i" type="text" placeholder="0" inputmode="numeric"
@@ -1459,10 +1501,11 @@ function buildReport() {
             </tr>`;
         } else {
             items.forEach((item, ii) => {
+                const subDisp = (item.sub || '') + (item.prod ? '(' + item.prod + ')' : '');
                 detRows += `<tr>
                     ${ii === 0 ? `<td rowspan="${items.length + 1}" style="vertical-align:top;padding:7px 5px">${ci+1}) ${cat}</td>` : ''}
                     <td class="rc" style="font-size:.76rem">${fmtDate(item.date)}</td>
-                    <td>${item.sub || ''}</td>
+                    <td>${subDisp}</td>
                     <td class="rc">${item.qty || ''}</td>
                     <td class="rc">${item.unit || ''}</td>
                     <td class="rv">${item.amt ? item.amt + ' 원' : ''}</td>
@@ -1700,11 +1743,12 @@ function copyRow(tr) {
     addRow({
         cat:   td[1].querySelector('select').value,
         sub:   td[2].querySelector('input').value,
-        date:  td[3].querySelector('input').value,
-        unit:  td[4].querySelector('select').value,
-        qty:   td[5].querySelector('input').value,
-        price: td[6].querySelector('input').value,
-        amt:   td[7].querySelector('input').value
+        prod:  td[3].querySelector('input').value,
+        date:  td[4].querySelector('input').value,
+        unit:  td[5].querySelector('select').value,
+        qty:   td[6].querySelector('input').value,
+        price: td[7].querySelector('input').value,
+        amt:   td[8].querySelector('input').value
     });
     showToast('행이 복사되었습니다.');
 }
@@ -1715,11 +1759,12 @@ function copyActRow(tr) {
     addActRow({
         cat:   td[1].querySelector('select').value,
         sub:   td[2].querySelector('input').value,
-        date:  td[3].querySelector('input').value,
-        unit:  td[4].querySelector('select').value,
-        qty:   td[5].querySelector('input').value,
-        price: td[6].querySelector('input').value,
-        amt:   td[7].querySelector('input').value,
+        prod:  td[3].querySelector('input').value,
+        date:  td[4].querySelector('input').value,
+        unit:  td[5].querySelector('select').value,
+        qty:   td[6].querySelector('input').value,
+        price: td[7].querySelector('input').value,
+        amt:   td[8].querySelector('input').value,
         imgs:  imgs
     });
     showToast('행이 복사되었습니다.');
@@ -1733,11 +1778,12 @@ function copySelectedRows() {
         addRow({
             cat:   td[1].querySelector('select').value,
             sub:   td[2].querySelector('input').value,
-            date:  td[3].querySelector('input').value,
-            unit:  td[4].querySelector('select').value,
-            qty:   td[5].querySelector('input').value,
-            price: td[6].querySelector('input').value,
-            amt:   td[7].querySelector('input').value
+            prod:  td[3].querySelector('input').value,
+            date:  td[4].querySelector('input').value,
+            unit:  td[5].querySelector('select').value,
+            qty:   td[6].querySelector('input').value,
+            price: td[7].querySelector('input').value,
+            amt:   td[8].querySelector('input').value
         });
     });
     showToast(checked.length + '개 항목이 복사되었습니다.');
@@ -1761,11 +1807,12 @@ function copySelectedActRows() {
         addActRow({
             cat:   td[1].querySelector('select').value,
             sub:   td[2].querySelector('input').value,
-            date:  td[3].querySelector('input').value,
-            unit:  td[4].querySelector('select').value,
-            qty:   td[5].querySelector('input').value,
-            price: td[6].querySelector('input').value,
-            amt:   td[7].querySelector('input').value,
+            prod:  td[3].querySelector('input').value,
+            date:  td[4].querySelector('input').value,
+            unit:  td[5].querySelector('select').value,
+            qty:   td[6].querySelector('input').value,
+            price: td[7].querySelector('input').value,
+            amt:   td[8].querySelector('input').value,
             imgs:  imgs
         });
     });
@@ -1794,11 +1841,12 @@ function snapActDetails() {
             _id:   rowId,
             cat:   td[1].querySelector('select').value,
             sub:   td[2].querySelector('input').value,
-            date:  td[3].querySelector('input').value,
-            unit:  td[4].querySelector('select').value,
-            qty:   td[5].querySelector('input').value,
-            price: td[6].querySelector('input').value,
-            amt:   td[7].querySelector('input').value,
+            prod:  td[3].querySelector('input').value,
+            date:  td[4].querySelector('input').value,
+            unit:  td[5].querySelector('select').value,
+            qty:   td[6].querySelector('input').value,
+            price: td[7].querySelector('input').value,
+            amt:   td[8].querySelector('input').value,
             imgs:  actRowImages[rowId] || []
         });
     });
@@ -1820,6 +1868,7 @@ function addActRow(d) {
         <td><select class="ti">${catOpts}</select></td>
         <td><input class="ti sub-i" type="text" placeholder="품목명을 기입하세요" value="${v(d,'sub')}"
             oninput="calcActAmt(this.closest('tr'))"></td>
+        <td><input class="ti prod-i" type="text" placeholder="제품명·규격 등" value="${v(d,'prod')}"></td>
         <td><input class="ti" type="date" value="${v(d,'date') || today}"></td>
         <td><select class="ti">${uOpts}</select></td>
         <td><input class="ti ti-r qty-i" type="text" placeholder="0" inputmode="numeric"
@@ -2103,10 +2152,11 @@ function buildActReport() {
             </tr>`;
         } else {
             items.forEach((item, ii) => {
+                const subDisp = (item.sub || '') + (item.prod ? '(' + item.prod + ')' : '');
                 detRows += `<tr>
                     ${ii === 0 ? `<td rowspan="${items.length + 1}" style="vertical-align:top;padding:7px 5px">${ci+1}) ${cat}</td>` : ''}
                     <td class="rc" style="font-size:.76rem">${fmtDate(item.date)}</td>
-                    <td>${item.sub || ''}</td>
+                    <td>${subDisp}</td>
                     <td class="rc">${item.qty || ''}</td>
                     <td class="rc">${item.unit || ''}</td>
                     <td class="rv">${item.amt ? item.amt + ' 원' : ''}</td>
@@ -2170,7 +2220,7 @@ function buildActReport() {
                     <tbody>
                         <tr>
                             <td style="padding:6px 5px;font-weight:600">${item.cat}</td>
-                            <td style="padding:6px 5px">${item.sub || ''}</td>
+                            <td style="padding:6px 5px">${(item.sub || '') + (item.prod ? '(' + item.prod + ')' : '')}</td>
                             <td style="padding:6px 5px;text-align:center">${fmtDate(item.date)}</td>
                             <td style="padding:6px 5px;text-align:center">${item.qty || ''}</td>
                             <td style="padding:6px 5px;text-align:center">${item.unit || ''}</td>
