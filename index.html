@@ -175,8 +175,13 @@
             margin-top: 12px; padding: 12px 15px;
             background: #e9f5ff; border: 1px solid #b3d7f5; border-radius: 8px;
             display: flex; justify-content: space-between; font-weight: 700; font-size: .97rem;
+            transition: background .3s, border-color .3s;
         }
-        .total-box span { color: #0056b3; }
+        .total-box span { color: #0056b3; transition: color .3s; }
+        .total-box.is-near { background: #fff8e1; border-color: #ffc107; }
+        .total-box.is-near span { color: #e67e00; }
+        .total-box.is-over { background: #fff0f0; border-color: #f5c6cb; }
+        .total-box.is-over span { color: #dc3545; }
 
         /* ── PDF Modal ── */
         .modal-overlay {
@@ -360,6 +365,40 @@
             .report-wrap { padding: 6px; }
             .rpage { page-break-after: always; }
         }
+
+        /* ── Mobile Mode ── */
+        body.mobile-mode { padding: 4px; }
+        body.mobile-mode .app {
+            max-width: 100%; border-radius: 0; box-shadow: none;
+        }
+        body.mobile-mode .app-header { padding: 10px 14px; }
+        body.mobile-mode .app-header h1 { font-size: .88rem; }
+        body.mobile-mode .step-bar { padding: 6px 10px; gap: 2px; }
+        body.mobile-mode .step-lbl { display: none; }
+        body.mobile-mode .step-dot-div { margin: 0 4px; height: 20px; }
+        body.mobile-mode .step-arr { margin: 0; }
+        body.mobile-mode .page-body { padding: 14px 12px; }
+        body.mobile-mode .page-nav { padding: 10px 12px; gap: 8px; }
+        body.mobile-mode .nav-left, body.mobile-mode .nav-right { flex-wrap: wrap; gap: 6px; }
+        body.mobile-mode .btn { padding: 10px 12px; font-size: .84rem; }
+        body.mobile-mode .sec-title { font-size: .92rem; margin-bottom: 12px; }
+        body.mobile-mode .igrid { grid-template-columns: 1fr; }
+        body.mobile-mode .ig.full { grid-column: span 1; }
+        body.mobile-mode .ig input, body.mobile-mode .ig select { font-size: .9rem; padding: 9px 10px; }
+        body.mobile-mode .home-hdr { flex-direction: column; align-items: stretch; gap: 10px; }
+        body.mobile-mode .home-hdr > div { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        body.mobile-mode .result-item { flex-direction: column; align-items: flex-start; gap: 3px; padding: 8px 10px; }
+        body.mobile-mode .result-group { margin-top: 12px; }
+        body.mobile-mode .total-box { flex-direction: column; gap: 5px; font-size: .9rem; padding: 10px 12px; }
+        body.mobile-mode .ti { font-size: .8rem; padding: 6px 4px; }
+        body.mobile-mode .dtbl { font-size: .76rem; }
+        body.mobile-mode .dtbl thead th { padding: 7px 3px; font-size: .74rem; }
+        body.mobile-mode #feeCompare3, body.mobile-mode #feeCompare5 {
+            flex-direction: column; gap: 4px; font-size: .82rem; padding: 8px 10px;
+        }
+        body.mobile-mode .rpage { padding: 20px 14px; }
+        body.mobile-mode .pt { font-size: .8rem; }
+        body.mobile-mode .pt th, body.mobile-mode .pt td { padding: 7px 5px; }
     </style>
 </head>
 <body>
@@ -482,7 +521,8 @@
     <!-- Header -->
     <div class="app-header">
         <h1>코웨이 산업안전보건관리비</h1>
-        <div style="display:flex;align-items:center;gap:10px">
+        <div style="display:flex;align-items:center;gap:8px">
+            <button class="help-btn" id="mobileToggleBtn" onclick="toggleMobileView()">📱 모바일</button>
             <button class="help-btn" onclick="openHelpModal()">도움말</button>
             <span class="ver">V2.3_2026.05.07</span>
         </div>
@@ -560,6 +600,33 @@
             <div id="emptySt" class="empty-st" style="display:none">
                 <div class="ei">📋</div>
                 <p>등록된 프로젝트가 없습니다.<br>새 프로젝트를 추가해주세요.</p>
+            </div>
+
+            <!-- 대시보드 -->
+            <div id="dashWrap" style="display:none;margin-top:24px">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                    <p class="sec-title" style="margin:0;font-size:.95rem">📊 전체 현황 요약</p>
+                    <button onclick="toggleDash()" id="dashToggleBtn"
+                        style="background:none;border:1px solid #ccc;border-radius:6px;font-size:.78rem;padding:3px 10px;cursor:pointer;color:#666">접기</button>
+                </div>
+                <div id="dashContent">
+                    <div class="pt-wrap">
+                        <table class="pt" style="min-width:820px">
+                            <thead>
+                                <tr>
+                                    <th style="width:14%">공사사업장명</th>
+                                    <th style="width:18%">공사명</th>
+                                    <th style="width:14%">계상액</th>
+                                    <th style="width:14%">계획금액</th>
+                                    <th style="width:12%">계획잔액</th>
+                                    <th style="width:14%">사용금액</th>
+                                    <th style="width:14%">사용잔액</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashBody"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -718,10 +785,11 @@
                 <label>총 계획금액 (부가세 제외)</label>
                 <span id="dtTotalDisp">0 원</span>
             </div>
-            <div id="feeCompare3" style="display:none;margin-top:8px;padding:10px 15px;background:#f0f7ff;border:1px solid #b3d7f5;border-radius:8px;font-size:.88rem;display:none;gap:12px;flex-wrap:wrap;align-items:center">
+            <div id="feeCompare3" style="display:none;margin-top:8px;padding:10px 15px;background:#f0f7ff;border:1px solid #b3d7f5;border-radius:8px;font-size:.88rem;gap:12px;flex-wrap:wrap;align-items:center;transition:background .3s,border-color .3s">
                 <span>계상된 산업안전보건관리비: <strong id="feeRef3" style="color:#0056b3">-</strong></span>
                 <span style="color:#bbb">|</span>
                 <span>계획금액: <strong id="planPct3" style="color:#218838">-</strong></span>
+                <span id="overWarn3" style="display:none;color:#dc3545;font-weight:700;font-size:.9rem">⚠️ 계상액 초과!</span>
             </div>
         </div>
         <div class="page-nav">
@@ -810,10 +878,11 @@
                 <label>총 사용금액 (부가세 제외)</label>
                 <span id="actDtTotalDisp">0 원</span>
             </div>
-            <div id="feeCompare5" style="display:none;margin-top:8px;padding:10px 15px;background:#fff5f5;border:1px solid #f5c6cb;border-radius:8px;font-size:.88rem;gap:12px;flex-wrap:wrap;align-items:center">
+            <div id="feeCompare5" style="display:none;margin-top:8px;padding:10px 15px;background:#fff5f5;border:1px solid #f5c6cb;border-radius:8px;font-size:.88rem;gap:12px;flex-wrap:wrap;align-items:center;transition:background .3s,border-color .3s">
                 <span>계상된 산업안전보건관리비: <strong id="feeRef5" style="color:#0056b3">-</strong></span>
                 <span style="color:#bbb">|</span>
                 <span>사용금액: <strong id="planPct5" style="color:#8b1c1c">-</strong></span>
+                <span id="overWarn5" style="display:none;color:#dc3545;font-weight:700;font-size:.9rem">⚠️ 계상액 초과!</span>
             </div>
         </div>
         <div class="page-nav">
@@ -1045,7 +1114,11 @@ function renderHome() {
     const empty = document.getElementById('emptySt');
     const list  = document.getElementById('projList');
     document.getElementById('chkAll').checked = false;
-    if (arr.length === 0) { wrap.style.display = 'none'; empty.style.display = 'block'; return; }
+    if (arr.length === 0) {
+        wrap.style.display = 'none'; empty.style.display = 'block';
+        document.getElementById('dashWrap').style.display = 'none';
+        return;
+    }
     wrap.style.display = 'block'; empty.style.display = 'none';
     list.innerHTML = '';
     arr.forEach((p, i) => {
@@ -1064,8 +1137,70 @@ function renderHome() {
                 onclick="editProj('${p.id}')">수정</button></td>`;
         list.appendChild(tr);
     });
+
+    // ── 대시보드 ──
+    const dashWrap = document.getElementById('dashWrap');
+    const dashBody = document.getElementById('dashBody');
+    dashWrap.style.display = 'block';
+    dashBody.innerHTML = '';
+    let totalFee = 0, totalPlan = 0, totalAct = 0;
+
+    const mkAmtCell = (val, fee, align) => {
+        if (val <= 0) return `<td style="text-align:right;padding-right:8px;color:#bbb">-</td>`;
+        const pct = fee > 0 ? (val / fee) * 100 : 0;
+        const color = fee > 0 && val > fee ? '#dc3545' : pct >= 80 ? '#e67e00' : '#218838';
+        const pctStr = fee > 0 ? ` (${pct.toFixed(1)}%)` : '';
+        return `<td style="text-align:right;padding-right:8px;color:${color};font-weight:600;font-size:.82rem">${val.toLocaleString('ko-KR')}${pctStr}</td>`;
+    };
+    const mkRemCell = (rem) => {
+        if (rem === 0) return `<td style="text-align:right;padding-right:8px;color:#bbb">-</td>`;
+        const color = rem < 0 ? '#dc3545' : '#333';
+        const fw = rem < 0 ? '700' : '400';
+        const prefix = rem < 0 ? '▼ ' : '';
+        return `<td style="text-align:right;padding-right:8px;color:${color};font-weight:${fw};font-size:.82rem">${prefix}${rem.toLocaleString('ko-KR')}</td>`;
+    };
+
+    arr.forEach(p => {
+        const fee  = (p.calc && p.calc.feeRaw) || 0;
+        const plan = (p.details  || []).filter(d => d.sub && d.sub.trim()).reduce((s, d) => s + unfmt(d.amt), 0);
+        const act  = (p.actDetails || []).filter(d => d.sub && d.sub.trim()).reduce((s, d) => s + unfmt(d.amt), 0);
+        totalFee += fee; totalPlan += plan; totalAct += act;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+            `<td class="td-l">${p.info.snm || '-'}</td>` +
+            `<td class="td-l">${p.info.nm  || '-'}</td>` +
+            `<td style="text-align:right;padding-right:8px;font-size:.82rem">${fee > 0 ? fee.toLocaleString('ko-KR') : '-'}</td>` +
+            mkAmtCell(plan, fee) +
+            mkRemCell(fee > 0 ? fee - plan : 0) +
+            mkAmtCell(act,  fee) +
+            mkRemCell(fee > 0 ? fee - act  : 0);
+        dashBody.appendChild(tr);
+    });
+
+    // 합계 행
+    const totTr = document.createElement('tr');
+    totTr.style.cssText = 'background:#f0f7ff;font-weight:700;border-top:2px solid #007bff;font-size:.82rem';
+    const fmtT = v => v > 0 ? v.toLocaleString('ko-KR') : '-';
+    const totPlanColor = totalFee > 0 && totalPlan > totalFee ? '#dc3545' : '#218838';
+    const totActColor  = totalFee > 0 && totalAct  > totalFee ? '#dc3545' : '#218838';
+    const totPlanRem = totalFee - totalPlan, totActRem = totalFee - totalAct;
+    totTr.innerHTML =
+        `<td colspan="2" style="text-align:center;padding:8px">합 &nbsp; 계</td>` +
+        `<td style="text-align:right;padding-right:8px">${fmtT(totalFee)}</td>` +
+        `<td style="text-align:right;padding-right:8px;color:${totPlanColor}">${fmtT(totalPlan)}</td>` +
+        `<td style="text-align:right;padding-right:8px;color:${totPlanRem < 0 ? '#dc3545' : '#333'};font-weight:700">${totalFee > 0 ? totPlanRem.toLocaleString('ko-KR') : '-'}</td>` +
+        `<td style="text-align:right;padding-right:8px;color:${totActColor}">${fmtT(totalAct)}</td>` +
+        `<td style="text-align:right;padding-right:8px;color:${totActRem < 0 ? '#dc3545' : '#333'};font-weight:700">${totalFee > 0 ? totActRem.toLocaleString('ko-KR') : '-'}</td>`;
+    dashBody.appendChild(totTr);
 }
 function toggleAll(chk) { document.querySelectorAll('.pchk').forEach(c => c.checked = chk.checked); }
+let _dashOpen = true;
+function toggleDash() {
+    _dashOpen = !_dashOpen;
+    document.getElementById('dashContent').style.display = _dashOpen ? 'block' : 'none';
+    document.getElementById('dashToggleBtn').textContent = _dashOpen ? '접기' : '펼치기';
+}
 
 // ══ PROJECT EXPORT / IMPORT ══
 function exportProjects() {
@@ -1324,14 +1459,37 @@ function updTotal() {
     const s = t.toLocaleString('ko-KR') + ' 원';
     document.getElementById('dtTotal').textContent = s;
     document.getElementById('dtTotalDisp').textContent = s;
+
+    const totalBox = document.querySelector('#pg3 .total-box');
     const box = document.getElementById('feeCompare3');
     if (box && cur && cur.calc && cur.calc.feeRaw > 0) {
+        const fee = cur.calc.feeRaw;
+        const pct = (t / fee) * 100;
         document.getElementById('feeRef3').textContent = cur.calc.feeTxt || '-';
-        const pct = ((t / cur.calc.feeRaw) * 100).toFixed(1);
-        document.getElementById('planPct3').textContent = (t > 0 ? t.toLocaleString('ko-KR') + ' 원' : '-') + (t > 0 ? '  (' + pct + '%)' : '');
+        document.getElementById('planPct3').textContent =
+            (t > 0 ? t.toLocaleString('ko-KR') + ' 원' : '-') + (t > 0 ? '  (' + pct.toFixed(1) + '%)' : '');
+
+        const warn = document.getElementById('overWarn3');
+        if (t > fee) {
+            document.getElementById('planPct3').style.color = '#dc3545';
+            box.style.background = '#fff0f0'; box.style.borderColor = '#f5c6cb';
+            if (warn) warn.style.display = 'inline';
+            if (totalBox) { totalBox.classList.remove('is-near'); totalBox.classList.add('is-over'); }
+        } else if (pct >= 80) {
+            document.getElementById('planPct3').style.color = '#e67e00';
+            box.style.background = '#fff8e1'; box.style.borderColor = '#ffc107';
+            if (warn) warn.style.display = 'none';
+            if (totalBox) { totalBox.classList.remove('is-over'); totalBox.classList.add('is-near'); }
+        } else {
+            document.getElementById('planPct3').style.color = '#218838';
+            box.style.background = '#f0f7ff'; box.style.borderColor = '#b3d7f5';
+            if (warn) warn.style.display = 'none';
+            if (totalBox) { totalBox.classList.remove('is-over', 'is-near'); }
+        }
         box.style.display = 'flex';
     } else if (box) {
         box.style.display = 'none';
+        if (totalBox) totalBox.classList.remove('is-over', 'is-near');
     }
 }
 
@@ -1680,25 +1838,31 @@ async function doExportPDF() {
         document.getElementById('rpage1'),
         document.getElementById('rpage2')
     ];
+    const toJpeg = (c) => c.toDataURL('image/jpeg', 0.82);
     const clearBtns = document.querySelectorAll('.sig-clear-btn');
     clearBtns.forEach(b => b.style.visibility = 'hidden');
     try {
         let first = true;
         for (const el of pages) {
             if (!el) continue;
-            const canvas = await html2canvas(el, { scale: 3, useCORS: true, backgroundColor: '#ffffff' });
+            const savedCss = el.style.cssText;
+            el.style.width = '794px'; el.style.maxWidth = 'none'; el.style.minWidth = '794px';
+            void el.offsetWidth;
+            const rowBreaks = getRowBreaks(el, 2);
+            const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+            el.style.cssText = savedCss;
             if (!first) doc.addPage();
             first = false;
             const ratio = canvas.width / canvas.height;
             const iw = uw, ih = iw / ratio;
             if (ih <= uh) {
-                doc.addImage(canvas.toDataURL('image/png'), 'PNG', mg, mg, iw, ih);
+                doc.addImage(toJpeg(canvas), 'JPEG', mg, mg, iw, ih);
             } else {
                 const pxPerMm = canvas.height / ih;
-                const slices = smartSlice(canvas, uh * pxPerMm, getRowBreaks(el, 3));
+                const slices = smartSlice(canvas, uh * pxPerMm, rowBreaks);
                 slices.forEach((s, i) => {
                     if (i > 0) doc.addPage();
-                    doc.addImage(s.canvas.toDataURL('image/png'), 'PNG', mg, mg, iw, s.h / pxPerMm);
+                    doc.addImage(toJpeg(s.canvas), 'JPEG', mg, mg, iw, s.h / pxPerMm);
                 });
             }
         }
@@ -1909,14 +2073,37 @@ function updActTotal() {
     const s = t.toLocaleString('ko-KR') + ' 원';
     document.getElementById('actDtTotal').textContent = s;
     document.getElementById('actDtTotalDisp').textContent = s;
+
+    const totalBox = document.querySelector('#pg5 .total-box');
     const box = document.getElementById('feeCompare5');
     if (box && cur && cur.calc && cur.calc.feeRaw > 0) {
+        const fee = cur.calc.feeRaw;
+        const pct = (t / fee) * 100;
         document.getElementById('feeRef5').textContent = cur.calc.feeTxt || '-';
-        const pct = ((t / cur.calc.feeRaw) * 100).toFixed(1);
-        document.getElementById('planPct5').textContent = (t > 0 ? t.toLocaleString('ko-KR') + ' 원' : '-') + (t > 0 ? '  (' + pct + '%)' : '');
+        document.getElementById('planPct5').textContent =
+            (t > 0 ? t.toLocaleString('ko-KR') + ' 원' : '-') + (t > 0 ? '  (' + pct.toFixed(1) + '%)' : '');
+
+        const warn = document.getElementById('overWarn5');
+        if (t > fee) {
+            document.getElementById('planPct5').style.color = '#dc3545';
+            box.style.background = '#ffe0e0'; box.style.borderColor = '#dc3545';
+            if (warn) warn.style.display = 'inline';
+            if (totalBox) { totalBox.classList.remove('is-near'); totalBox.classList.add('is-over'); }
+        } else if (pct >= 80) {
+            document.getElementById('planPct5').style.color = '#e67e00';
+            box.style.background = '#fff8e1'; box.style.borderColor = '#ffc107';
+            if (warn) warn.style.display = 'none';
+            if (totalBox) { totalBox.classList.remove('is-over'); totalBox.classList.add('is-near'); }
+        } else {
+            document.getElementById('planPct5').style.color = '#8b1c1c';
+            box.style.background = '#fff5f5'; box.style.borderColor = '#f5c6cb';
+            if (warn) warn.style.display = 'none';
+            if (totalBox) { totalBox.classList.remove('is-over', 'is-near'); }
+        }
         box.style.display = 'flex';
     } else if (box) {
         box.style.display = 'none';
+        if (totalBox) totalBox.classList.remove('is-over', 'is-near');
     }
 }
 
@@ -2322,7 +2509,12 @@ async function doExportActPDF() {
         let first = true;
         for (const el of pages) {
             if (!el) continue;
+            const savedCss = el.style.cssText;
+            el.style.width = '794px'; el.style.maxWidth = 'none'; el.style.minWidth = '794px';
+            void el.offsetWidth;
+            const rowBreaks = getRowBreaks(el, 2);
             const canvas = await html2canvas(el, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff' });
+            el.style.cssText = savedCss;
             if (!first) doc.addPage();
             first = false;
             const ratio = canvas.width / canvas.height;
@@ -2331,7 +2523,7 @@ async function doExportActPDF() {
                 doc.addImage(toJpeg(canvas), 'JPEG', mg, mg, iw, ih);
             } else {
                 const pxPerMm = canvas.height / ih;
-                const slices = smartSlice(canvas, uh * pxPerMm, getRowBreaks(el, 2));
+                const slices = smartSlice(canvas, uh * pxPerMm, rowBreaks);
                 slices.forEach((s, i) => {
                     if (i > 0) doc.addPage();
                     doc.addImage(toJpeg(s.canvas), 'JPEG', mg, mg, iw, s.h / pxPerMm);
@@ -2421,7 +2613,26 @@ function applyRates(target, base, type) {
     return base * r.J;
 }
 
+// ══ MOBILE VIEW TOGGLE ══
+let _mobileMode = localStorage.getItem('mobileMode') === '1';
+function applyMobileMode() {
+    if (_mobileMode) {
+        document.body.classList.add('mobile-mode');
+        document.getElementById('mobileToggleBtn').textContent = '🖥️ 데스크톱';
+    } else {
+        document.body.classList.remove('mobile-mode');
+        document.getElementById('mobileToggleBtn').textContent = '📱 모바일';
+    }
+}
+function toggleMobileView() {
+    _mobileMode = !_mobileMode;
+    localStorage.setItem('mobileMode', _mobileMode ? '1' : '0');
+    applyMobileMode();
+    showToast(_mobileMode ? '📱 모바일 화면으로 전환되었습니다' : '🖥️ 데스크톱 화면으로 전환되었습니다');
+}
+
 // ══ INIT ══
+applyMobileMode();
 showPage(0);
 </script>
 </body>
