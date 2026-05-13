@@ -6,6 +6,7 @@
     <title>코웨이 산업안전보건관리비</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -233,7 +234,7 @@
         }
         .r-title { text-align: center; font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; letter-spacing: 1px; }
         .rt { width: 100%; border-collapse: collapse; font-size: .8rem; margin-bottom: 4px; }
-        .rt th, .rt td { border: 1px solid #333; padding: 5px 7px; vertical-align: middle; }
+        .rt th, .rt td { border: 1px solid #333; padding: 4px 5px; vertical-align: middle; }
         .rt th { background: #f5f5f5; font-weight: 700; text-align: center; white-space: nowrap; }
         .rv { text-align: right; }
         .rc { text-align: center; }
@@ -344,6 +345,36 @@
         }
         .img-badge.has-img { background: #fff3cd; color: #856404; border-color: #ffc107; }
 
+        /* ── Evidence Guide Modal ── */
+        .eg-cat { border-bottom: 1px solid #f0f0f0; margin-bottom: 12px; padding-bottom: 10px; }
+        .eg-cat-title { font-size: .88rem; font-weight: 700; color: #0056b3; margin-bottom: 6px; }
+        .eg-item { margin-left: 10px; margin-bottom: 6px; }
+        .eg-item-name { font-size: .82rem; font-weight: 600; color: #333; }
+        .eg-item-name::before { content: '▸ '; color: #007bff; }
+        .eg-docs { font-size: .78rem; color: #666; margin-left: 12px; line-height: 1.6; }
+        .eg-docs::before { content: '📄 필요서류: '; color: #888; font-weight: 600; }
+
+        /* ── Evidence Upload ── */
+        .evid-section { margin-top: 16px; padding-top: 14px; border-top: 2px solid #eee; }
+        .evid-section-title { font-size: .84rem; font-weight: 700; color: #555; margin-bottom: 8px; }
+        .evid-drop-zone {
+            border: 2px dashed #bbb; border-radius: 8px; padding: 18px;
+            text-align: center; color: #888; cursor: pointer;
+            transition: border-color .2s, background .2s; font-size: .86rem; line-height: 1.7;
+        }
+        .evid-drop-zone:hover, .evid-drop-zone.drag-over { border-color: #007bff; background: #e9f5ff; color: #007bff; }
+        .evid-preview {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border: 1px solid #d4edda; border-radius: 8px;
+            background: #f0fff4; margin-top: 0;
+        }
+        .evid-preview-icon { font-size: 1.6rem; flex-shrink: 0; }
+        .evid-preview-info { flex: 1; overflow: hidden; }
+        .evid-preview-name { font-size: .86rem; font-weight: 600; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .evid-preview-desc { font-size: .76rem; color: #666; margin-top: 2px; }
+        .evid-del-btn { background: none; border: none; color: #dc3545; font-size: 1.1rem; cursor: pointer; padding: 4px 8px; border-radius: 4px; flex-shrink: 0; }
+        .evid-del-btn:hover { background: #fce8e8; }
+
         /* ── 보고서 페이지 고정 레이아웃 ── */
         body.report-body { overflow: hidden; }
         .app.report-mode {
@@ -399,7 +430,17 @@
         body.mobile-mode .ig.full { grid-column: span 1; }
         body.mobile-mode .ig input, body.mobile-mode .ig select { font-size: .9rem; padding: 9px 10px; }
         body.mobile-mode .home-hdr { flex-direction: column; align-items: stretch; gap: 10px; }
-        body.mobile-mode .home-hdr > div { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        body.mobile-mode .home-hdr > div {
+            display: flex !important; flex-wrap: nowrap !important; gap: 5px;
+        }
+        body.mobile-mode .home-hdr > div > button {
+            flex: 1; min-width: 0; font-size: 0; padding: 9px 2px; white-space: nowrap;
+        }
+        body.mobile-mode .home-hdr > div > button:nth-child(1)::before { content: '삭제';    font-size: .74rem; }
+        body.mobile-mode .home-hdr > div > button:nth-child(2)::before { content: '복사';    font-size: .74rem; }
+        body.mobile-mode .home-hdr > div > button:nth-child(3)::before { content: '+ 추가';  font-size: .74rem; }
+        body.mobile-mode .home-hdr > div > button:nth-child(4)::before { content: '내보내기'; font-size: .72rem; }
+        body.mobile-mode .home-hdr > div > button:nth-child(5)::before { content: '가져오기'; font-size: .72rem; }
         body.mobile-mode .result-item { flex-direction: column; align-items: flex-start; gap: 3px; padding: 8px 10px; }
         body.mobile-mode .result-group { margin-top: 12px; }
         body.mobile-mode .total-box { flex-direction: column; gap: 5px; font-size: .9rem; padding: 10px 12px; }
@@ -414,6 +455,16 @@
         body.mobile-mode .pt th, body.mobile-mode .pt td { padding: 7px 5px; }
         body.mobile-mode .app.report-mode { height: calc(100dvh - 40px); }
         body.mobile-mode .page-nav { padding-bottom: max(env(safe-area-inset-bottom, 0px), 12px); }
+
+        /* Mobile: 헤더 간결화 */
+        body.mobile-mode .ver { display: none; }
+        body.mobile-mode #userDisplayName { display: none; }
+        body.mobile-mode .app-header > div { flex-wrap: nowrap !important; gap: 6px; }
+
+        /* Mobile: 하단 버튼 레이아웃 */
+        /* 처음으로 버튼 → 🏠 아이콘만 */
+        body.mobile-mode .nav-left .btn-home { font-size: 0; padding: 10px 13px; flex-shrink: 0; }
+        body.mobile-mode .nav-left .btn-home::before { content: '🏠'; font-size: .88rem; }
 
         /* ── Login Overlay ── */
         #loginOverlay {
@@ -520,6 +571,87 @@
             overflow: hidden; flex-shrink: 0;
         }
         .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* ══ ADMIN PAGE ══ */
+        #pgAdmin {
+            position: fixed; inset: 0; background: #f0f2f5;
+            z-index: 5000; overflow-y: auto;
+            display: none; flex-direction: column;
+        }
+        .adm-header {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff; padding: 14px 24px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,.3);
+        }
+        .adm-header h2 { font-size: 1.05rem; font-weight: 700; }
+        .adm-header .adm-sub { font-size: .72rem; opacity: .7; margin-bottom: 2px; }
+        .adm-exit-btn {
+            background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3);
+            color: #fff; padding: 7px 16px; border-radius: 6px; cursor: pointer;
+            font-size: .85rem;
+        }
+        .adm-body { padding: 20px 24px; }
+        .adm-stats { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+        .adm-stat-card {
+            background: #fff; border-radius: 10px; padding: 16px 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,.08); flex: 1; min-width: 110px;
+        }
+        .adm-stat-val { font-size: 1.8rem; font-weight: 700; color: #0056b3; }
+        .adm-stat-lbl { font-size: .76rem; color: #666; margin-top: 2px; }
+        .adm-tabs { display: flex; border-bottom: 2px solid #e0e0e0; margin-bottom: 0; }
+        .adm-tab {
+            padding: 10px 20px; background: transparent; border: none;
+            border-bottom: 3px solid transparent; cursor: pointer;
+            font-size: .88rem; font-weight: 600; color: #666; margin-bottom: -2px;
+        }
+        .adm-tab:hover { color: #0056b3; }
+        .adm-tab.active { color: #0056b3; border-bottom-color: #0056b3; }
+        .adm-tab-content { display: none; padding-top: 18px; }
+        .adm-tab-content.active { display: block; }
+        .adm-table-wrap { overflow-x: auto; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+        .adm-table { width: 100%; border-collapse: collapse; background: #fff; font-size: .82rem; }
+        .adm-table th {
+            background: #f0f4f8; padding: 10px 12px; text-align: left;
+            font-weight: 700; color: #333; border-bottom: 2px solid #dde3ea; white-space: nowrap;
+        }
+        .adm-table td { padding: 9px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; color: #444; }
+        .adm-table tr:hover td { background: #f8fafc; }
+        .adm-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: .74rem; font-weight: 600; }
+        .adm-badge.done { background: #d4edda; color: #155724; }
+        .adm-badge.none { background: #f5f5f5; color: #aaa; }
+        .adm-edit-btn { padding: 4px 12px; font-size: .78rem; background: #007bff; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        .adm-del-btn  { padding: 4px 12px; font-size: .78rem; background: #dc3545; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-left: 4px; }
+        .adm-search { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; }
+        .adm-search input { flex: 1; padding: 8px 14px; border: 1px solid #ddd; border-radius: 6px; font-size: .88rem; }
+        .adm-no-data { text-align: center; padding: 40px; color: #aaa; font-size: .9rem; }
+        .adm-loading  { text-align: center; padding: 50px; color: #888; font-size: .9rem; }
+
+        /* Admin pass modal */
+        #adminPassModal {
+            position: fixed; inset: 0; background: rgba(0,0,0,.6);
+            z-index: 9000; display: none; align-items: center; justify-content: center;
+        }
+        .adm-pass-box {
+            background: #fff; border-radius: 14px; padding: 32px 28px;
+            width: 300px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,.25);
+        }
+        .adm-lock-icon { font-size: 2.2rem; margin-bottom: 10px; }
+        .adm-pass-box h3 { font-size: 1.1rem; margin-bottom: 6px; }
+        .adm-pass-box p  { font-size: .82rem; color: #666; margin-bottom: 18px; }
+        .adm-pass-box input {
+            width: 100%; padding: 10px 14px; border: 1.5px solid #ddd;
+            border-radius: 7px; font-size: 1rem; margin-bottom: 8px;
+            text-align: center; letter-spacing: 2px; outline: none;
+        }
+        .adm-pass-box input:focus { border-color: #007bff; }
+        .adm-pass-err { color: #e74c3c; font-size: .8rem; margin-bottom: 10px; min-height: 18px; }
+        .adm-pass-btns { display: flex; gap: 8px; }
+        .adm-pass-btns button { flex: 1; padding: 10px; border-radius: 7px; cursor: pointer; font-size: .9rem; font-weight: 600; }
+        .adm-pass-cancel { background: #f0f0f0; border: none; color: #555; }
+        .adm-pass-ok { background: #0056b3; border: none; color: #fff; }
+
     </style>
 </head>
 <body>
@@ -687,7 +819,7 @@
 <div class="app">
     <!-- Header -->
     <div class="app-header">
-        <h1>코웨이 산업안전보건관리비</h1>
+        <h1 onclick="adminHeaderClick()" style="cursor:default;user-select:none">코웨이 산업안전보건관리비</h1>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
             <div class="user-info" id="userInfoWrap" style="display:none">
                 <div class="user-avatar" id="userAvatar">?</div>
@@ -740,6 +872,12 @@
             <div class="step-num" id="sn6">6</div>
             <span class="step-lbl" id="sl6">사용내역서 확인</span>
         </div>
+    </div>
+
+    <!-- 관리자 수정 모드 배너 -->
+    <div id="adminEditBanner" style="display:none;background:#c0392b;color:#fff;padding:8px 20px;align-items:center;justify-content:space-between;gap:10px;font-size:.85rem;">
+        <span>🛡️ 관리자 수정 모드 — <b id="adminEditBannerName"></b> 를 수정 중입니다</span>
+        <button onclick="exitAdminEditMode()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:5px 14px;border-radius:5px;cursor:pointer;font-size:.82rem;white-space:nowrap">✓ 완료 · 관리자 페이지로</button>
     </div>
 
     <!-- ════ PAGE 0: HOME ════ -->
@@ -898,6 +1036,30 @@
                         inputmode="numeric" oninput="fmtNum(this); doCalc();">
                 </div>
             </div>
+            <!-- 계상근거 첨부 -->
+            <div class="evid-section">
+                <div class="evid-section-title">📎 계상근거 첨부 (견적서 또는 원가계산서)</div>
+                <p style="font-size:.78rem;color:#e67e00;font-weight:600;margin:0 0 8px;line-height:1.5">* 아래에 첨부가 불가할 경우 코웨이 공사담당자에게 별도로 제출 바랍니다.</p>
+                <div class="evid-drop-zone" id="evidDropZone"
+                    onclick="document.getElementById('evidFileInput').click()"
+                    ondragover="event.preventDefault();this.classList.add('drag-over')"
+                    ondragleave="this.classList.remove('drag-over')"
+                    ondrop="handleEvidDrop(event)">
+                    <div style="font-size:2rem;margin-bottom:6px">📄</div>
+                    파일을 드래그하거나 클릭하여 첨부하세요<br>
+                    <span style="font-size:.76rem;color:#bbb">이미지 파일(JPG·PNG 등) 또는 PDF · 최대 10MB</span>
+                </div>
+                <input type="file" id="evidFileInput" accept="image/*,application/pdf" style="display:none" onchange="handleEvidFileSelect(this)">
+                <div class="evid-preview" id="evidPreview" style="display:none">
+                    <div class="evid-preview-icon" id="evidPreviewIcon">📄</div>
+                    <div class="evid-preview-info">
+                        <div class="evid-preview-name" id="evidPreviewName"></div>
+                        <div class="evid-preview-desc" id="evidPreviewDesc"></div>
+                    </div>
+                    <button class="evid-del-btn" onclick="removeEvidFile()" title="첨부 삭제">✕</button>
+                </div>
+            </div>
+
             <div class="result-group">
                 <div class="result-item"><label>대상액</label><span id="R_target">-</span></div>
                 <div class="result-item"><label>산업안전보건관리비</label><span id="R_fee">-</span></div>
@@ -1109,8 +1271,125 @@
             <input type="file" id="imgFileInput" accept="image/*" multiple style="display:none" onchange="handleImgSelect(this)">
             <div class="img-list" id="imgList"></div>
         </div>
-        <div class="img-pop-ftr">
+        <div class="img-pop-ftr" style="justify-content:space-between">
+            <button class="btn btn-outline" onclick="openEvidGuide()">📋 첨부 예시</button>
             <button class="btn btn-primary" onclick="closeImgPopup()">확 인</button>
+        </div>
+    </div>
+</div>
+
+<!-- 증빙자료 첨부 예시 안내 팝업 -->
+<div class="modal-overlay" id="evidGuideModal" style="display:none" onclick="if(event.target===this)closeEvidGuide()">
+    <div class="modal-box" style="max-width:580px;width:94vw;text-align:left;padding:0;display:flex;flex-direction:column;max-height:88vh">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:2px solid #f0f0f0;flex-shrink:0">
+            <p class="modal-title" style="margin:0;font-size:1.05rem">📋 항목별 증빙자료 첨부 예시</p>
+            <button onclick="closeEvidGuide()" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:#aaa;line-height:1;padding:0 2px">✕</button>
+        </div>
+        <div style="flex:1;overflow-y:auto;padding:18px 22px;font-size:.83rem;line-height:1.75;color:#444">
+
+            <div class="eg-cat">
+                <div class="eg-cat-title">1) 보호구 등</div>
+                <div class="eg-item">
+                    <div class="eg-item-name">보호구 구입비</div>
+                    <div class="eg-docs">세금계산서 또는 카드영수증 · 거래명세서 · 현장 입고 사진 · 보호구 지급대장</div>
+                </div>
+            </div>
+
+            <div class="eg-cat">
+                <div class="eg-cat-title">2) 안전보건관리자 임금 등</div>
+                <div class="eg-item">
+                    <div class="eg-item-name">안전·보건관리자 임금 및 출장비 전액</div>
+                    <div class="eg-docs">급여명세서 · 근무일지 · 고용노동부 선임신고서</div>
+                </div>
+                <div class="eg-item">
+                    <div class="eg-item-name">작업지휘자·유도자·신호수·화기감시자 임금 전액</div>
+                    <div class="eg-docs">급여명세서 · 근무일지 · 작업 사진</div>
+                </div>
+                <div class="eg-item">
+                    <div class="eg-item-name">관리감독자 업무수당 (총 임금의 10% 이내)</div>
+                    <div class="eg-docs">급여명세서 · 근무일지 · 관리감독자 지정서</div>
+                </div>
+            </div>
+
+            <div class="eg-cat">
+                <div class="eg-cat-title">3) 안전시설비 등</div>
+                <div class="eg-item">
+                    <div class="eg-item-name">안전난간·추락방호망·안전대 부착설비·방호장치 등</div>
+                    <div class="eg-docs">세금계산서 또는 카드영수증 · 거래명세서 · 현장 설치사진</div>
+                </div>
+                <div class="eg-item">
+                    <div class="eg-item-name">스마트 안전장비 구입비 (안전관리비의 20% 이내)</div>
+                    <div class="eg-docs">세금계산서 또는 카드영수증 · 거래명세서 · 현장 설치사진</div>
+                </div>
+                <div class="eg-item">
+                    <div class="eg-item-name">용접 등 화재 위험작업 시 소화기 구입비</div>
+                    <div class="eg-docs">세금계산서 또는 카드영수증 · 거래명세서 · 현장 설치사진</div>
+                </div>
+            </div>
+
+            <div class="eg-cat">
+                <div class="eg-cat-title">4) 안전보건진단비 등</div>
+                <div class="eg-item">
+                    <div class="eg-item-name">유해위험방지계획서 작성 등 소요 비용</div>
+                    <div class="eg-docs">세금계산서 또는 카드영수증 · 현장 유해위험방지계획서 결과물</div>
+                </div>
+                <div class="eg-item">
+                    <div class="eg-item-name">안전보건진단 소요 비용</div>
+                    <div class="eg-docs">세금계산서 또는 카드영수증 · 현장 안전보건진단 결과물</div>
+                </div>
+                <div class="eg-item">
+                    <div class="eg-item-name">작업환경측정 소요 비용</div>
+                    <div class="eg-docs">세금계산서 또는 카드영수증 · 현장 작업환경측정 결과물</div>
+                </div>
+            </div>
+
+            <div class="eg-cat">
+                <div class="eg-cat-title">5) 안전보건교육비 등</div>
+                <div class="eg-item">
+                    <div class="eg-item-name">산업재해 예방 목적의 교육비용</div>
+                    <div class="eg-docs">세금계산서 또는 카드영수증 · 교육일지(수료증) · 작업자 명부 리스트</div>
+                </div>
+                <div class="eg-item">
+                    <div class="eg-item-name">유해위험요인 발굴·개선 우수근로자 포상비</div>
+                    <div class="eg-docs">급여 또는 포상금 지급내역서 · 작업자 명부 리스트 · 포상금 지급 기준 및 근거자료</div>
+                </div>
+            </div>
+
+            <div class="eg-cat">
+                <div class="eg-cat-title">6) 근로자 건강장해예방비 등</div>
+                <div class="eg-item">
+                    <div class="eg-item-name">건강장해 예방에 필요한 비용</div>
+                    <div class="eg-docs">세금계산서 또는 카드영수증 · 거래명세서 · 현장 입고 사진</div>
+                </div>
+            </div>
+
+            <div class="eg-cat">
+                <div class="eg-cat-title">7) 건설재해예방전문지도기관 기술지도비 등</div>
+                <div class="eg-item">
+                    <div class="eg-item-name">전문지도기관 지도 대가비용 (자기공사자만 가능)</div>
+                    <div class="eg-docs">세금계산서 또는 카드영수증 · 기술지도계약서 · 기술지도 결과보고서</div>
+                </div>
+            </div>
+
+            <div class="eg-cat">
+                <div class="eg-cat-title">8) 본사 전담조직 근로자 임금 등</div>
+                <div class="eg-item">
+                    <div class="eg-item-name">본사 중대재해처벌법 조직 근로자 임금 및 출장비 전액</div>
+                    <div class="eg-docs">조직 현황 및 근무 내역 · 급여명세서</div>
+                </div>
+            </div>
+
+            <div class="eg-cat" style="border-bottom:none;margin-bottom:0;padding-bottom:0">
+                <div class="eg-cat-title">9) 위험성평가 소요 비용</div>
+                <div class="eg-item">
+                    <div class="eg-item-name">위험성평가 개선이행 관련 비용 (안전관리비의 15% 이내)</div>
+                    <div class="eg-docs">위험성평가 결과보고서 · 사전 협의 내용(회의록) · 세금계산서 또는 카드영수증 · 거래내역서 및 관련 사진</div>
+                </div>
+            </div>
+
+        </div>
+        <div style="padding:12px 22px;border-top:1px solid #eee;flex-shrink:0;display:flex;justify-content:flex-end">
+            <button class="btn btn-home" style="padding:8px 22px" onclick="closeEvidGuide()">닫 기</button>
         </div>
     </div>
 </div>
@@ -1137,6 +1416,55 @@
         <div class="modal-btns">
             <button class="btn btn-home" onclick="closeActPdfModal()">취 소</button>
             <button class="btn btn-success" onclick="doExportActPDF()">다운로드</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ ADMIN PASS MODAL ══ -->
+<div id="adminPassModal">
+    <div class="adm-pass-box">
+        <div class="adm-lock-icon">🔐</div>
+        <h3>관리자 인증</h3>
+        <p>관리자 비밀번호를 입력하세요</p>
+        <input type="password" id="adminPassInput" placeholder="••••••••"
+            onkeydown="if(event.key==='Enter') checkAdminPass()">
+        <div class="adm-pass-err" id="adminPassErr"></div>
+        <div class="adm-pass-btns">
+            <button class="adm-pass-cancel" onclick="closeAdminPassModal()">취 소</button>
+            <button class="adm-pass-ok" onclick="checkAdminPass()">확 인</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══ ADMIN PAGE ══ -->
+<div id="pgAdmin">
+    <div class="adm-header">
+        <div>
+            <div class="adm-sub">코웨이 산업안전보건관리비</div>
+            <h2>🛡️ 관리자 페이지</h2>
+        </div>
+        <button class="adm-exit-btn" onclick="exitAdminPage()">← 나가기</button>
+    </div>
+    <div class="adm-body">
+        <div class="adm-stats">
+            <div class="adm-stat-card"><div class="adm-stat-val" id="admStatUsers">-</div><div class="adm-stat-lbl">총 사용자</div></div>
+            <div class="adm-stat-card"><div class="adm-stat-val" id="admStatProjects">-</div><div class="adm-stat-lbl">총 프로젝트</div></div>
+        </div>
+        <div class="adm-tabs">
+            <button class="adm-tab active" id="admTab0" onclick="switchAdmTab(0)">📊 전체 현황</button>
+            <button class="adm-tab" id="admTab1" onclick="switchAdmTab(1)">👥 사용자 관리</button>
+        </div>
+        <!-- Tab 0 -->
+        <div class="adm-tab-content active" id="admTabC0">
+            <div class="adm-search">
+                <input type="text" id="admSearch0" placeholder="공사명, 업체명, 사업장명, 작성자 검색..." oninput="admFilterTable()">
+                <button class="btn btn-outline" onclick="loadAdminData()" style="white-space:nowrap">🔄 새로고침</button>
+            </div>
+            <div class="adm-table-wrap" id="admTableWrap0"><div class="adm-loading">⏳ 로딩 중...</div></div>
+        </div>
+        <!-- Tab 1 -->
+        <div class="adm-tab-content" id="admTabC1">
+            <div class="adm-table-wrap" id="admTableWrap1"><div class="adm-loading">⏳ 로딩 중...</div></div>
         </div>
     </div>
 </div>
@@ -1223,8 +1551,9 @@ function _persist() {
 }
 
 function _persistFirestore() {
-    if (!cur || !auth.currentUser) return;
-    const uid = auth.currentUser.uid;
+    if (!cur) return;
+    const uid = (_adminEditMode ? _adminEditMode.uid : null) || auth.currentUser?.uid;
+    if (!uid) return;
     db.collection('users').doc(uid).collection('projects').doc(cur.id)
         .set(projectToFirestore(cur))
         .then(() => { _lastSyncTime = new Date(); updateSyncStatus(); })
@@ -1396,6 +1725,13 @@ function goTo(n) {
     showPage(n);
 }
 function goHome() {
+    if (_adminEditMode) {
+        showConfirm('관리자 수정 모드를 종료하고 관리자 페이지로 돌아가시겠습니까?\n현재까지 변경 내용은 저장됩니다.', () => {
+            try { saveCurrent(); persistCurrent(); } catch(e) {}
+            exitAdminEditMode();
+        }, { icon: '🛡️', title: '관리자 수정 모드 종료', okText: '종료', okClass: 'btn-primary' });
+        return;
+    }
     if (!cur || pg === 0) { cur = null; showPage(0); return; }
     showConfirm('프로젝트 목록으로 돌아가시겠습니까?\n작업 내용은 자동으로 저장됩니다.', () => {
         try { saveCurrent(); persistCurrent(); } catch(e) {} cur = null; showPage(0);
@@ -1722,6 +2058,7 @@ function loadCalc() {
     document.getElementById('R_target').innerText = c.targetTxt || '-';
     document.getElementById('R_fee').innerText    = c.feeTxt    || '-';
     handleDiv();
+    if (c.evidFile) _showEvidPreview(); else _hideEvidPreview();
 }
 function snapCalc() {
     if (!cur) return;
@@ -1736,7 +2073,8 @@ function snapCalc() {
         targetTxt: document.getElementById('R_target').innerText,
         feeTxt:    document.getElementById('R_fee').innerText,
         targetRaw: cur.calc.targetRaw,
-        feeRaw:    cur.calc.feeRaw
+        feeRaw:    cur.calc.feeRaw,
+        evidFile:  cur.calc.evidFile || null
     };
 }
 function handleDiv() {
@@ -1970,6 +2308,10 @@ function buildReport() {
                 <td colspan="7">${calc.div === '구분됨' ? '구분됨 (재료비와 노무비가 견적서에 구분됨)' : '구분안됨 (재료비와 노무비가 견적서에 구분안됨)'}</td>
             </tr>
             <tr>
+                <th>총공사금액<br>(VAT포함)</th>
+                <td class="rv" colspan="7">${calc.vat ? calc.vat + ' 원' : '-'}</td>
+            </tr>
+            <tr>
                 <th rowspan="4">공사종류<br>(해당난에<br>✔ 표)</th>
                 <td class="rc">건축공사 ${ck('건축공사')}</td>
                 <th rowspan="4">공사금액</th>
@@ -2101,7 +2443,20 @@ function buildReport() {
         </table>
     </div>`;
 
-    document.getElementById('reportOut').innerHTML = r1 + '<hr class="r-divider">' + r2;
+    const evidPages = cur.calc && cur.calc.evidFile && cur.calc.evidFile.pages ? cur.calc.evidFile.pages : [];
+    const evidFileName = cur.calc && cur.calc.evidFile ? cur.calc.evidFile.name : '';
+    const evidContent = evidPages.length > 0
+        ? `<p style="font-size:.78rem;color:#666;text-align:center;margin-bottom:14px">첨부파일: ${evidFileName}</p>` +
+          evidPages.map(p => `<img src="${p}" style="width:100%;margin-bottom:14px;display:block;border:1px solid #eee">`).join('')
+        : '<p style="text-align:center;color:#aaa;padding:60px 0;font-size:.92rem">📄 첨부없음</p>';
+    const r3 = `
+    <div class="rpage" id="rpage3">
+        <h2 class="r-title">계 상 근 거</h2>
+        <p style="text-align:center;font-size:.8rem;color:#888;margin-bottom:16px;border-bottom:1px solid #eee;padding-bottom:10px">견적서 또는 원가계산서</p>
+        ${evidContent}
+    </div>`;
+
+    document.getElementById('reportOut').innerHTML = r1 + '<hr class="r-divider">' + r2 + '<hr class="r-divider">' + r3;
     initSig();
     if (!cur.sign) cur.sign = { role:'', name:'', sig:'', rDate:'' };
     const sr  = document.getElementById('sig_role');
@@ -2237,16 +2592,19 @@ async function doExportPDF() {
     const uw  = pw - mg * 2;
     const uh  = ph - mg * 2;
 
-    const pages = [
+    // rpage1, rpage2 는 html2canvas로 처리, rpage3(계상근거)는 별도 처리
+    const htmlPages = [
         document.getElementById('rpage1'),
         document.getElementById('rpage2')
-    ];
+    ].filter(Boolean);
     const toJpeg = (c) => c.toDataURL('image/jpeg', 0.82);
     const clearBtns = document.querySelectorAll('.sig-clear-btn');
     clearBtns.forEach(b => b.style.visibility = 'hidden');
+    const phInputs = document.querySelectorAll('#reportOut input[placeholder]');
+    phInputs.forEach(inp => { inp.setAttribute('data-ph-bk', inp.placeholder); inp.placeholder = ''; });
     try {
         let first = true;
-        for (const el of pages) {
+        for (const el of htmlPages) {
             if (!el) continue;
             const savedCss = el.style.cssText;
             el.style.width = '794px'; el.style.maxWidth = 'none'; el.style.minWidth = '794px'; el.style.zoom = '1';
@@ -2269,8 +2627,41 @@ async function doExportPDF() {
                 });
             }
         }
+
+        // 계상근거 페이지: 이미지는 직접 삽입(분리 없음), 첨부없음은 html2canvas로
+        const evidFile = cur && cur.calc && cur.calc.evidFile;
+        const evidImgPages = evidFile && evidFile.pages && evidFile.pages.length > 0 ? evidFile.pages : null;
+        doc.addPage();
+        if (evidImgPages) {
+            for (let i = 0; i < evidImgPages.length; i++) {
+                if (i > 0) doc.addPage();
+                const dataUrl = evidImgPages[i];
+                const dims = await new Promise(res => {
+                    const img = new Image(); img.onload = () => res({ w: img.width, h: img.height }); img.src = dataUrl;
+                });
+                const imgRatio = dims.w / dims.h;
+                const pgRatio  = uw / uh;
+                let iw, ih;
+                if (imgRatio > pgRatio) { iw = uw; ih = uw / imgRatio; }
+                else { ih = uh; iw = uh * imgRatio; }
+                doc.addImage(dataUrl, 'JPEG', mg + (uw - iw) / 2, mg + (uh - ih) / 2, iw, ih);
+            }
+        } else {
+            const rp3 = document.getElementById('rpage3');
+            if (rp3) {
+                const savedCss = rp3.style.cssText;
+                rp3.style.width = '794px'; rp3.style.maxWidth = 'none'; rp3.style.minWidth = '794px'; rp3.style.zoom = '1';
+                void rp3.offsetWidth;
+                const canvas3 = await html2canvas(rp3, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+                rp3.style.cssText = savedCss;
+                const r3 = canvas3.width / canvas3.height;
+                const iw3 = uw, ih3 = iw3 / r3;
+                doc.addImage(toJpeg(canvas3), 'JPEG', mg, mg, iw3, Math.min(ih3, uh));
+            }
+        }
     } finally {
         clearBtns.forEach(b => b.style.visibility = '');
+        phInputs.forEach(inp => { inp.placeholder = inp.getAttribute('data-ph-bk') || ''; inp.removeAttribute('data-ph-bk'); });
     }
     doc.save(fn);
 }
@@ -2654,6 +3045,10 @@ function buildActReport() {
                 <td colspan="7">${calc.div === '구분됨' ? '구분됨 (재료비와 노무비가 견적서에 구분됨)' : '구분안됨 (재료비와 노무비가 견적서에 구분안됨)'}</td>
             </tr>
             <tr>
+                <th>총공사금액<br>(VAT포함)</th>
+                <td class="rv" colspan="7">${calc.vat ? calc.vat + ' 원' : '-'}</td>
+            </tr>
+            <tr>
                 <th rowspan="4">공사종류<br>(해당난에<br>✔ 표)</th>
                 <td class="rc">건축공사 ${ck('건축공사')}</td>
                 <th rowspan="4">공사금액</th>
@@ -2909,6 +3304,8 @@ async function doExportActPDF() {
     const toJpeg = (c) => c.toDataURL('image/jpeg', 0.82);
     const clearBtns2 = document.querySelectorAll('.sig-clear-btn');
     clearBtns2.forEach(b => b.style.visibility = 'hidden');
+    const phInputs2 = document.querySelectorAll('#actReportOut input[placeholder]');
+    phInputs2.forEach(inp => { inp.setAttribute('data-ph-bk', inp.placeholder); inp.placeholder = ''; });
     try {
         let first = true;
         for (const el of pages) {
@@ -2936,8 +3333,102 @@ async function doExportActPDF() {
         }
     } finally {
         clearBtns2.forEach(b => b.style.visibility = '');
+        phInputs2.forEach(inp => { inp.placeholder = inp.getAttribute('data-ph-bk') || ''; inp.removeAttribute('data-ph-bk'); });
     }
     doc.save(fn);
+}
+
+// ══ EVID GUIDE MODAL ══
+function openEvidGuide()  { document.getElementById('evidGuideModal').style.display = 'flex'; }
+function closeEvidGuide() { document.getElementById('evidGuideModal').style.display = 'none'; }
+
+// ══ EVIDENCE FILE ══
+const EVID_MAX_BYTES = 10 * 1024 * 1024;
+
+async function _processEvidFile(file) {
+    if (file.size > EVID_MAX_BYTES) { showToast('⚠️ 파일 크기가 10MB를 초과합니다.'); return; }
+    if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = async e => {
+            const compressed = await compressImage(e.target.result, 1200, 1600, 0.65);
+            if (!cur.calc) cur.calc = {};
+            cur.calc.evidFile = { name: file.name, type: 'image', pages: [compressed] };
+            _persist();
+            _showEvidPreview();
+            showToast('✅ 계상근거 첨부 완료');
+        };
+        reader.readAsDataURL(file);
+    } else if (file.type === 'application/pdf') {
+        showToast('📄 PDF 변환 중...');
+        try {
+            const pdfjsLib = window.pdfjsLib;
+            if (!pdfjsLib) { showToast('⚠️ PDF 라이브러리 로딩 중입니다. 잠시 후 다시 시도해주세요.'); return; }
+            pdfjsLib.GlobalWorkerOptions.workerSrc =
+                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+            const pages = [];
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale: 1.5 });
+                const cvs = document.createElement('canvas');
+                cvs.width = viewport.width; cvs.height = viewport.height;
+                await page.render({ canvasContext: cvs.getContext('2d'), viewport }).promise;
+                // PDF 페이지를 최대 1200x1600으로 축소 후 저장
+                let pw2 = cvs.width, ph2 = cvs.height;
+                if (pw2 > 1200) { ph2 = Math.round(ph2 * 1200 / pw2); pw2 = 1200; }
+                if (ph2 > 1600) { pw2 = Math.round(pw2 * 1600 / ph2); ph2 = 1600; }
+                const smallCvs = document.createElement('canvas');
+                smallCvs.width = pw2; smallCvs.height = ph2;
+                smallCvs.getContext('2d').drawImage(cvs, 0, 0, pw2, ph2);
+                pages.push(smallCvs.toDataURL('image/jpeg', 0.65));
+            }
+            if (!cur.calc) cur.calc = {};
+            cur.calc.evidFile = { name: file.name, type: 'pdf', pages };
+            _persist();
+            _showEvidPreview();
+            showToast(`✅ PDF ${pdf.numPages}페이지 첨부 완료`);
+        } catch (e) {
+            showToast('⚠️ PDF 처리 오류: ' + (e.message || e));
+        }
+    } else {
+        showToast('⚠️ 이미지(JPG·PNG 등) 또는 PDF 파일만 첨부 가능합니다.\n해당 형식으로 변환 후 다시 첨부해주세요.');
+    }
+}
+function handleEvidFileSelect(input) {
+    const file = input.files[0];
+    input.value = '';
+    if (!file || !cur) return;
+    _processEvidFile(file);
+}
+function handleEvidDrop(e) {
+    e.preventDefault();
+    document.getElementById('evidDropZone').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (!file || !cur) return;
+    _processEvidFile(file);
+}
+function removeEvidFile() {
+    if (!cur) return;
+    showConfirm('첨부된 계상근거를 삭제하시겠습니까?', () => {
+        if (cur.calc) cur.calc.evidFile = null;
+        _persist();
+        _hideEvidPreview();
+    }, { icon: '📄', title: '첨부 삭제', okText: '삭 제', okClass: 'btn-danger' });
+}
+function _showEvidPreview() {
+    if (!cur || !cur.calc || !cur.calc.evidFile) return;
+    const f = cur.calc.evidFile;
+    document.getElementById('evidDropZone').style.display = 'none';
+    document.getElementById('evidPreview').style.display = 'flex';
+    document.getElementById('evidPreviewIcon').textContent = f.type === 'pdf' ? '📄' : '🖼️';
+    document.getElementById('evidPreviewName').textContent = f.name;
+    document.getElementById('evidPreviewDesc').textContent =
+        (f.pages ? f.pages.length + '페이지' : '') + ' · 첨부 완료';
+}
+function _hideEvidPreview() {
+    document.getElementById('evidDropZone').style.display = '';
+    document.getElementById('evidPreview').style.display = 'none';
 }
 
 // ══ IMAGE COMPRESS ══
@@ -3111,6 +3602,13 @@ auth.onAuthStateChanged(async user => {
         }
         wrap.style.display = 'flex';
 
+        // 사용자 프로필 저장 (관리자 페이지에서 조회용)
+        db.collection('users').doc(user.uid).set({
+            email: user.email || '',
+            displayName: user.displayName || user.email || '',
+            lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).catch(() => {});
+
         // Firestore에서 프로젝트 목록 로드
         showLoadingOverlay(true);
         try {
@@ -3152,6 +3650,217 @@ auth.onAuthStateChanged(async user => {
         document.getElementById('loginOverlay').style.display = 'flex';
     }
 });
+
+// ══ ADMIN PAGE ══
+let _adminData = null;
+let _adminEditTarget = null;
+let _adminEditMode = null; // { uid, projectId }
+let _headerClickCount = 0;
+let _headerClickTimer = null;
+
+function adminHeaderClick() {
+    _headerClickCount++;
+    clearTimeout(_headerClickTimer);
+    _headerClickTimer = setTimeout(() => { _headerClickCount = 0; }, 1800);
+    if (_headerClickCount >= 7) {
+        _headerClickCount = 0;
+        clearTimeout(_headerClickTimer);
+        openAdminPassModal();
+    }
+}
+
+function openAdminPassModal() {
+    document.getElementById('adminPassInput').value = '';
+    document.getElementById('adminPassErr').textContent = '';
+    document.getElementById('adminPassModal').style.display = 'flex';
+    setTimeout(() => document.getElementById('adminPassInput').focus(), 100);
+}
+function closeAdminPassModal() {
+    document.getElementById('adminPassModal').style.display = 'none';
+}
+function checkAdminPass() {
+    if (document.getElementById('adminPassInput').value === 'rmswn007') {
+        closeAdminPassModal();
+        enterAdminPage();
+    } else {
+        document.getElementById('adminPassErr').textContent = '비밀번호가 올바르지 않습니다.';
+        document.getElementById('adminPassInput').value = '';
+        document.getElementById('adminPassInput').focus();
+    }
+}
+
+function enterAdminPage() {
+    document.getElementById('pgAdmin').style.display = 'flex';
+    loadAdminData();
+}
+function exitAdminPage() {
+    document.getElementById('pgAdmin').style.display = 'none';
+}
+
+function adminEditFull(uid, projectId) {
+    const user = _adminData?.users.find(u => u.uid === uid);
+    const proj = user?.projects.find(p => p.id === projectId);
+    if (!proj) return;
+    _adminEditMode = { uid, projectId };
+    cur = JSON.parse(JSON.stringify(proj));
+    // 배너 표시
+    document.getElementById('adminEditBannerName').textContent = proj.info?.nm || '프로젝트';
+    document.getElementById('adminEditBanner').style.display = 'flex';
+    // 관리자 페이지 숨기고 페이지 1로 이동
+    document.getElementById('pgAdmin').style.display = 'none';
+    loadInfo();
+    showPage(1);
+}
+
+function exitAdminEditMode() {
+    // _adminData에 변경사항 반영
+    if (_adminEditMode && _adminData && cur) {
+        const user = _adminData.users.find(u => u.uid === _adminEditMode.uid);
+        if (user) {
+            const idx = user.projects.findIndex(p => p.id === _adminEditMode.projectId);
+            if (idx >= 0) user.projects[idx] = JSON.parse(JSON.stringify(cur));
+        }
+    }
+    _adminEditMode = null;
+    cur = null;
+    document.getElementById('adminEditBanner').style.display = 'none';
+    // 관리자 페이지 복귀 및 테이블 갱신
+    document.getElementById('pgAdmin').style.display = 'flex';
+    renderAdmOverview();
+    showPage(0);
+}
+
+async function loadAdminData() {
+    if (_localMode) { showToast('로컬 모드에서는 관리자 기능을 사용할 수 없습니다.'); return; }
+    ['admTableWrap0','admTableWrap1'].forEach(id => {
+        document.getElementById(id).innerHTML = '<div class="adm-loading">⏳ 데이터 로딩 중...</div>';
+    });
+    ['admStatUsers','admStatProjects'].forEach(id => {
+        document.getElementById(id).textContent = '...';
+    });
+    try {
+        // collectionGroup으로 모든 사용자의 프로젝트를 한번에 조회
+        const projSnap = await db.collectionGroup('projects').get();
+        const userMap = {};
+        for (const doc of projSnap.docs) {
+            const uid = doc.ref.parent.parent.id;
+            if (!userMap[uid]) userMap[uid] = { uid, email: '', displayName: '', lastSeen: null, projects: [] };
+            userMap[uid].projects.push(doc.data());
+        }
+        // 사용자 프로필 보강 (로그인 이력이 있는 경우)
+        await Promise.all(Object.keys(userMap).map(async uid => {
+            try {
+                const pd = await db.collection('users').doc(uid).get();
+                if (pd.exists) {
+                    const d = pd.data();
+                    userMap[uid].email       = d.email       || '';
+                    userMap[uid].displayName = d.displayName || '';
+                    userMap[uid].lastSeen    = d.lastSeen    || null;
+                }
+            } catch(e) {}
+        }));
+        _adminData = { users: Object.values(userMap) };
+        const allProj = _admAllProjects();
+        document.getElementById('admStatUsers').textContent    = _adminData.users.length;
+        document.getElementById('admStatProjects').textContent = allProj.length;
+        renderAdmOverview();
+        renderAdmUsers();
+    } catch(e) {
+        document.getElementById('admTableWrap0').innerHTML =
+            `<div class="adm-no-data">⚠️ 데이터 로드 실패: ${e.message}<br><small style="color:#bbb">Firestore 보안 규칙을 확인하세요.</small></div>`;
+        document.getElementById('admTableWrap1').innerHTML = '';
+    }
+}
+
+function switchAdmTab(n) {
+    for (let i = 0; i < 2; i++) {
+        document.getElementById('admTab' + i).classList.toggle('active', i === n);
+        document.getElementById('admTabC' + i).classList.toggle('active', i === n);
+    }
+}
+
+function _admAllProjects() {
+    if (!_adminData) return [];
+    return _adminData.users.flatMap(u =>
+        u.projects.map(p => ({ ...p, _uid: u.uid, _email: u.email || '', _name: u.displayName || '' }))
+    );
+}
+
+function _admFmtDate(ts) {
+    if (!ts) return '-';
+    try {
+        const d = ts.toDate ? ts.toDate() : new Date(ts);
+        if (isNaN(d)) return '-';
+        return d.toLocaleDateString('ko-KR') + ' ' + d.toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' });
+    } catch { return '-'; }
+}
+
+function renderAdmOverview(filter) {
+    filter = filter !== undefined ? filter : (document.getElementById('admSearch0')?.value || '');
+    const q = filter.toLowerCase();
+    const projs = _admAllProjects().filter(p => !q ||
+        (p.info?.nm||'').toLowerCase().includes(q) ||
+        (p.info?.co||'').toLowerCase().includes(q) ||
+        (p.info?.snm||'').toLowerCase().includes(q) ||
+        p._email.toLowerCase().includes(q) ||
+        p._name.toLowerCase().includes(q)
+    );
+    if (projs.length === 0) {
+        document.getElementById('admTableWrap0').innerHTML = '<div class="adm-no-data">조회된 프로젝트가 없습니다.</div>';
+        return;
+    }
+    const esc = s => (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const rows = projs.map((p, i) => `<tr>
+        <td style="text-align:center;color:#bbb;font-size:.78rem">${i+1}</td>
+        <td style="font-weight:600">${p.info?.nm || '-'}</td>
+        <td>${p.info?.co || '-'}</td>
+        <td>${p.info?.snm || '-'}</td>
+        <td><span style="font-weight:600">${p._name || '-'}</span><br><span style="font-size:.74rem;color:#999">${p._email}</span></td>
+        <td style="font-size:.76rem;white-space:nowrap">${p.info?.from||'-'} ~ ${p.info?.to||'-'}</td>
+        <td style="white-space:nowrap">
+            <button class="adm-edit-btn" onclick="adminEditFull('${esc(p._uid)}','${esc(p.id)}')">수정</button>
+            <button class="adm-del-btn"  onclick="adminDeleteProject('${esc(p._uid)}','${esc(p.id)}','${esc(p.info?.nm)}')">삭제</button>
+        </td>
+    </tr>`).join('');
+    document.getElementById('admTableWrap0').innerHTML = `
+        <table class="adm-table">
+            <thead><tr><th>#</th><th>공사명</th><th>업체명</th><th>사업장명</th><th>작성자</th><th>공사기간</th><th>관리</th></tr></thead>
+            <tbody>${rows}</tbody>
+        </table>`;
+}
+
+function renderAdmUsers() {
+    if (!_adminData?.users.length) {
+        document.getElementById('admTableWrap1').innerHTML = '<div class="adm-no-data">등록된 사용자가 없습니다.</div>';
+        return;
+    }
+    const rows = _adminData.users.map((u, i) => `<tr>
+        <td style="text-align:center;color:#bbb;font-size:.78rem">${i+1}</td>
+        <td><div style="font-weight:600">${u.displayName||'-'}</div><div style="font-size:.76rem;color:#999">${u.email||'-'}</div></td>
+        <td style="text-align:center;font-weight:700;color:#0056b3">${u.projects.length}</td>
+        <td style="font-size:.78rem">${_admFmtDate(u.lastSeen)}</td>
+    </tr>`).join('');
+    document.getElementById('admTableWrap1').innerHTML = `
+        <table class="adm-table">
+            <thead><tr><th>#</th><th>사용자</th><th style="text-align:center">프로젝트 수</th><th>최근 접속</th></tr></thead>
+            <tbody>${rows}</tbody>
+        </table>`;
+}
+
+function admFilterTable() { renderAdmOverview(document.getElementById('admSearch0').value); }
+
+async function adminDeleteProject(uid, projectId, nm) {
+    showConfirm(`"${nm}" 프로젝트를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`, async () => {
+        try {
+            await db.collection('users').doc(uid).collection('projects').doc(projectId).delete();
+            const user = _adminData?.users.find(u => u.uid === uid);
+            if (user) user.projects = user.projects.filter(p => p.id !== projectId);
+            document.getElementById('admStatProjects').textContent = _admAllProjects().length;
+            renderAdmOverview();
+            showToast('🗑️ 삭제되었습니다.');
+        } catch(e) { showToast('⚠️ 삭제 오류: ' + e.message); }
+    }, { icon: '🗑️', title: '프로젝트 삭제', okText: '삭제', okClass: 'btn-danger' });
+}
 </script>
 </body>
 </html>
