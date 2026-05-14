@@ -832,7 +832,7 @@
             </div>
             <button class="help-btn" id="mobileToggleBtn" onclick="toggleMobileView()">📱 모바일</button>
             <button class="help-btn" onclick="openHelpModal()">도움말</button>
-            <span class="ver">V2.4_2026.05.11</span>
+            <span class="ver">V2.5_2026.05.14</span>
         </div>
     </div>
 
@@ -1258,6 +1258,7 @@
             <h3>📎 증빙자료 첨부</h3>
             <button style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#888;line-height:1" onclick="closeImgPopup()">✕</button>
         </div>
+        <div id="imgPopupItemInfo" style="display:none;background:#f0f4ff;border-bottom:1px solid #d0d9f0;padding:8px 16px;font-size:.8rem;color:#444;line-height:1.6"></div>
         <div class="img-pop-body">
             <div class="img-drop-zone" id="imgDropZone"
                 onclick="document.getElementById('imgFileInput').click()"
@@ -1266,7 +1267,7 @@
                 ondrop="handleImgDrop(event)">
                 <div style="font-size:2rem;margin-bottom:6px">🖼️</div>
                 사진을 드래그하거나 클릭하여 파일을 선택하세요<br>
-                <span style="font-size:.76rem;color:#bbb">JPG · PNG · GIF · WEBP 등 이미지 파일만 가능 · 파일당 최대 3MB</span>
+                <span style="font-size:.76rem;color:#bbb">JPG · PNG · GIF · WEBP 등 이미지 파일만 가능 · 파일당 최대 10MB</span>
             </div>
             <input type="file" id="imgFileInput" accept="image/*" multiple style="display:none" onchange="handleImgSelect(this)">
             <div class="img-list" id="imgList"></div>
@@ -2906,6 +2907,26 @@ let curImgRowId = null;
 
 function openImgPopup(rowId) {
     curImgRowId = rowId;
+    const infoDiv = document.getElementById('imgPopupItemInfo');
+    const tr = document.querySelector(`tr[data-row-id="${rowId}"]`);
+    if (tr) {
+        const sub  = tr.querySelector('.sub-i')?.value?.trim() || '';
+        const prod = tr.querySelector('.prod-i')?.value?.trim() || '';
+        const qty  = tr.querySelector('.qty-i')?.value?.trim() || '';
+        const unit = tr.querySelector('select:nth-of-type(2)')?.value || '';
+        const parts = [];
+        if (sub)  parts.push(`<b>세부항목</b> ${sub}`);
+        if (prod) parts.push(`<b>제품명</b> ${prod}`);
+        if (qty)  parts.push(`<b>수량</b> ${qty}${unit}`);
+        if (parts.length > 0) {
+            infoDiv.innerHTML = parts.join('<span style="color:#bbb;margin:0 6px">|</span>');
+            infoDiv.style.display = 'block';
+        } else {
+            infoDiv.style.display = 'none';
+        }
+    } else {
+        infoDiv.style.display = 'none';
+    }
     renderImgList();
     document.getElementById('imgPopupOv').style.display = 'flex';
 }
@@ -2949,9 +2970,9 @@ function addImagesToRow(files) {
     if (!actRowImages[curImgRowId]) actRowImages[curImgRowId] = [];
     const nonImg = files.filter(f => !f.type.startsWith('image/'));
     if (nonImg.length > 0) showToast('이미지 파일만 첨부할 수 있습니다.');
-    const valid  = files.filter(f => f.type.startsWith('image/') && f.size <= 3 * 1024 * 1024);
-    const big    = files.filter(f => f.type.startsWith('image/') && f.size > 3 * 1024 * 1024);
-    if (big.length > 0) showToast('3MB 초과 파일은 첨부할 수 없습니다: ' + big.map(f => f.name).join(', '));
+    const valid  = files.filter(f => f.type.startsWith('image/') && f.size <= 10 * 1024 * 1024);
+    const big    = files.filter(f => f.type.startsWith('image/') && f.size > 10 * 1024 * 1024);
+    if (big.length > 0) showToast('10MB 초과 파일은 첨부할 수 없습니다: ' + big.map(f => f.name).join(', '));
     if (!valid.length) return;
     let loaded = 0;
     valid.forEach(file => {
