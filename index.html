@@ -739,7 +739,7 @@
             <ul>
                 <li><b>공사구분</b> : 건축 / 토목(생산설비) / 중건설 / 특수건설 중 해당 공사를 선택합니다.</li>
                 <li><b>공사내역구분</b> : 견적서에서 재료비·노무비가 구분되어 있으면 "구분됨"을 선택합니다.</li>
-                <li><b>총공사금액(VAT 제외)</b> 입력 시 VAT 포함 금액이 자동 계산됩니다.</li>
+                <li><b>총공사금액(VAT 및 안전관리비 제외)</b> 입력 시 VAT 포함 금액이 자동 계산됩니다.</li>
                 <li>대상액과 산업안전보건관리비는 입력값이 바뀔 때마다 실시간 자동 계산됩니다.</li>
                 <li>총공사금액(VAT 포함) <b>2천만원 미만</b>은 "계상 대상 아님"으로 표시됩니다.</li>
             </ul>
@@ -1012,7 +1012,7 @@
                     </select>
                 </div>
                 <div class="ig">
-                    <label>③-1 총공사금액 (VAT 제외)</label>
+                    <label>③-1 총공사금액 (VAT 및 안전관리비 제외)</label>
                     <input type="text" id="C5_pre_vat" placeholder="숫자 입력"
                         inputmode="numeric" oninput="fmtNum(this); calcVAT(); doCalc();">
                 </div>
